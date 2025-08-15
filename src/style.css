@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2'),
+       url('/fonts/Vazirmatn-Regular.ttf') format('ttf');
+}
+
+body, input, button, textarea, select {
+  font-family: 'Vazirmatn';
+}
