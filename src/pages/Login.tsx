@@ -58,7 +58,7 @@ export default function LoginPage() {
             <option value="MOBILE">نام کاربری و پسورد</option>
           </select>
 
-          <label className="text-gray-700 dark:text-gray-200 font-semibold mt-2">
+          <label className="text-gray-700 dark:text-gray-200 font-semibold mt-2" style={{fontFamily: "Vazirmatn"}}>
             صحت سنجی
           </label>
           <select
