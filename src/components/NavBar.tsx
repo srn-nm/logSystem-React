@@ -3,6 +3,9 @@ import MyDrawer from "./MiniDrawer";
 import { useDrawer } from "../states/useDrawer";
 import { motion } from "framer-motion";
 import MenuIcon from '@mui/icons-material/Menu';
+import SearchBar from "./SearchBar";
+import List from "./List";
+
 
 interface DrawerOpenProps {
   drawerOpen: boolean,
@@ -37,10 +40,15 @@ export default function NavBar({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
       
   
           </button>
-          <h1 className="text-xl font-bold transition-colors">System Logs</h1>
+          <h1 className="text-xl font-bold transition-colors ">System Logs</h1>
+
+          <div className="absolute left-0 align-middle "><SearchBar ></SearchBar></div>
+    
         </div>
       </nav>
 
     </>
   );
 }
+
+

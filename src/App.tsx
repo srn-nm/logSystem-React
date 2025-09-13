@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import router from "./router/Router";
 import Loading from './pages/Loading';
+import DataContext from "./components/dataContext";
 import "./style.css";
 
 function App() {
@@ -11,15 +12,12 @@ function App() {
     localStorage.setItem("isLoggedIn", "false");
   }, []);
 
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This fires when the window finishes loading
     const handleLoad = () => setLoading(false);
-    
+
     if (document.readyState === "complete") {
-      // Page already loaded
       setLoading(false);
     } else {
       window.addEventListener("load", handleLoad);
@@ -27,15 +25,13 @@ function App() {
     }
   }, []);
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", "dark");
-    localStorage.setItem("isLoggedIn", "false");
-  }, []);
+  const [searchInput, setSearchInput] = useState<string>("");
 
-  return loading ? <Loading /> : <RouterProvider router={router} />;
+  return (
+    <DataContext.Provider value={{ searchInput, setSearchInput }}>
+      {loading ? <Loading /> : <RouterProvider router={router} />}
+    </DataContext.Provider>
+  );
 }
 
 export default App;
-
-
-

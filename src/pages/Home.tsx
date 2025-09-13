@@ -1,13 +1,24 @@
+import { useContext } from "react";
+import DataContext from "../components/dataContext";
 import "../style.css";
-import { Box } from "@mui/material";
+import { Box, Card } from "@mui/material";
+import List from "../components/List";
+import DataCard from "../components/DataCard";
 
 export default function Home() {
+
+  const context = useContext(DataContext);
+
+  if (!context) {
+    throw new Error("SearchBar must be used within a DataContext.Provider");
+  }
+
+  const {searchInput, setSearchInput } = context;
+  
   return (
-    <div
-      className="flex justify-center items-start bg-opacity-50 bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-full h-screen shadow-lg rounded-xl p-10"
-      style={{ direction: "rtl" }}
-    >
-      
-    </div>
+      <div className="flex flex-wrap gap-5 justify-stretch m-5">
+        <List searchInput={searchInput} />
+      </div>
+
   );
 }
