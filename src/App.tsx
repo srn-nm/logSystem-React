@@ -32,6 +32,7 @@ function App() {
       {loading ? <Loading /> : <RouterProvider router={router} />}
     </DataContext.Provider>
   );
+  
 }
 
 export default App;

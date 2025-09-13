@@ -1,3 +1,5 @@
+//this component is not used now, and it is saved for later use
+
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -21,7 +23,7 @@ export default function DataCard({ children }: { children: React.ReactNode }) {
             },
           }}
         >
-            <CardContent className=' bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors rtl -lg'>
+            <CardContent className=' bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors rtl'>
               <Typography gutterBottom sx={{ color: 'text.main', fontSize: 18, direction:"rtl" }}>
                 {children}
               </Typography>

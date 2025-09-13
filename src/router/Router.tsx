@@ -4,7 +4,6 @@ import Layout from "../components/Layout";
 import LoginPage from "../pages/Login";
 import PrivateRoute from "../components/PrivateRoute";
 import ErrorElement from "../components/ErrorElement";
-import Dashboard from "../pages/dashboard";
 
 const router = createBrowserRouter([
   {
@@ -23,10 +22,10 @@ const router = createBrowserRouter([
             index: true,
             element: <Home />,
           },
-          {
-            path: "Dashboard",
-            element: <Dashboard />,
-          },
+          // {
+          //   path: "Dashboard",
+          //   element: <Dashboard />,
+          // },
         ],
       },
     ],

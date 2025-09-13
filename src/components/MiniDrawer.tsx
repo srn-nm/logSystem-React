@@ -85,25 +85,25 @@ const groups: DrawerGroup[] = [
   {
     groupName: "Reports",
     items: [], 
-    path: "/reports",
+    path: "/",
     icon: "",
   },
-  {
-    groupName: "Main",
-    items: [
-      { id: "1", label: "Dashboard", path: "/" },
-      { id: "2", label: "Orders", path: "/orders" },
-    ],
-    icon: "",
-  },
-  {
-    groupName: "Management",
-    items: [
-      { id: "3", label: "Products", path: "/products" },
-      { id: "4", label: "Settings", path: "/settings" },
-    ],
-    icon: "",
-  },
+  // {
+  //   groupName: "Main",
+  //   items: [
+  //     { id: "1", label: "Dashboard", path: "/" },
+  //     { id: "2", label: "Orders", path: "/orders" },
+  //   ],
+  //   icon: "",
+  // },
+  // {
+  //   groupName: "Management",
+  //   items: [
+  //     { id: "3", label: "Products", path: "/products" },
+  //     { id: "4", label: "Settings", path: "/settings" },
+  //   ],
+  //   icon: "",
+  // },
   
 ];
 
