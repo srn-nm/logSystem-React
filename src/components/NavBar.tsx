@@ -21,7 +21,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
   return (
     <>
     
-      <nav className="flex items-center justify-between px-0 py-3 shadow-md transition-colors dark:bg-gray-800 dark:text-white  bg-white text-gray-900" style={{ direction: "rtl" }}>
+      <nav className="flex items-center justify-between px-0 py-3 shadow-md transition-colors dark:bg-gray-800 dark:text-gray-200 bg-white text-gray-900" style={{ direction: "rtl" }}>
         <div className="flex items-center pr-4">
           <button
             onClick={() => toggleDrawerOpen()}
@@ -32,7 +32,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
                 transition-all duration-150"
           >
             <MenuIcon
-              className="w-6 h-6 "
+              className="w-6 h-6 color-gray-200"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

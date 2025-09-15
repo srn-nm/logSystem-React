@@ -1,15 +1,15 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import router from "./router/Router";
 import Loading from './pages/Loading';
-import DataContext from "./components/dataContext";
+import DataContext from "./contexts/dataContext";
 import "./style.css";
 
 function App() {
   document.documentElement.setAttribute("data-theme", "dark");
 
   useEffect(() => {
-    localStorage.setItem("isLoggedIn", "false");
+    localStorage.setItem("isLoggedIn", "true");
   }, []);
 
   const [loading, setLoading] = useState(true);

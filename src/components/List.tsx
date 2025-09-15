@@ -1,3 +1,5 @@
+//this component is not used now, and it is saved for later use
+
 import {useState, type JSXElementConstructor, type Key, type ReactElement, type ReactNode, type ReactPortal } from 'react'
 import data from "../data/dummy_data.json"
 import DataCard from './DataCard';

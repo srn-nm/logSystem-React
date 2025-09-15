@@ -25,7 +25,7 @@ export default function Layout() {
         </motion.main>
 
         <footer className="flex items-center justify-center px-6 py-4 shadow-lg transition-colors dark:bg-gray-800 dark:text-white bg-white text-gray-900">
-          .تمامی حقوق متعلق به شرکت کیسون است
+          .تمامی حقوق متعلق به کیتکو می باشد
         </footer>
       </Box>
       <MiniDrawer drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen}/>

@@ -1,46 +1,13 @@
-import * as React from 'react';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
+import { useContext, useState } from "react";
+import DataContext from "../contexts/dataContext";
 
 interface Column {
-  id: 'name' | 'code' | 'population' | 'size' | 'density';
+  id: keyof Data;
   label: string;
   minWidth?: number;
-  align?: 'right';
+  align?: "right";
   format?: (value: number) => string;
 }
-
-const columns: readonly Column[] = [
-  { id: 'name', label: 'Name', minWidth: 170 },
-  { id: 'code', label: 'ISO\u00a0Code', minWidth: 100 },
-  {
-    id: 'population',
-    label: 'Population',
-    minWidth: 170,
-    align: 'right',
-    format: (value: number) => value.toLocaleString('en-US'),
-  },
-  {
-    id: 'size',
-    label: 'Size\u00a0(km\u00b2)',
-    minWidth: 170,
-    align: 'right',
-    format: (value: number) => value.toLocaleString('en-US'),
-  },
-  {
-    id: 'density',
-    label: 'Density',
-    minWidth: 170,
-    align: 'right',
-    format: (value: number) => value.toFixed(2),
-  },
-];
 
 interface Data {
   name: string;
@@ -50,98 +17,158 @@ interface Data {
   density: number;
 }
 
-function createData(
-  name: string,
-  code: string,
-  population: number,
-  size: number,
-): Data {
+const columns: Column[] = [
+  { id: "name", label: "Name", minWidth: 170 },
+  { id: "code", label: "ISO Code", minWidth: 100 },
+  {
+    id: "population",
+    label: "Population",
+    minWidth: 170,
+    align: "right",
+    format: (value) => value.toLocaleString("en-US"),
+  },
+  {
+    id: "size",
+    label: "Size (km²)",
+    minWidth: 170,
+    align: "right",
+    format: (value) => value.toLocaleString("en-US"),
+  },
+  {
+    id: "density",
+    label: "Density",
+    minWidth: 170,
+    align: "right",
+    format: (value) => value.toFixed(2),
+  },
+];
+
+function createData(name: string, code: string, population: number, size: number): Data {
   const density = population / size;
   return { name, code, population, size, density };
 }
 
-const rows = [
-  createData('India', 'IN', 1324171354, 3287263),
-  createData('China', 'CN', 1403500365, 9596961),
-  createData('Italy', 'IT', 60483973, 301340),
-  createData('United States', 'US', 327167434, 9833520),
-  createData('Canada', 'CA', 37602103, 9984670),
-  createData('Australia', 'AU', 25475400, 7692024),
-  createData('Germany', 'DE', 83019200, 357578),
-  createData('Ireland', 'IE', 4857000, 70273),
-  createData('Mexico', 'MX', 126577691, 1972550),
-  createData('Japan', 'JP', 126317000, 377973),
-  createData('France', 'FR', 67022000, 640679),
-  createData('United Kingdom', 'GB', 67545757, 242495),
-  createData('Russia', 'RU', 146793744, 17098246),
-  createData('Nigeria', 'NG', 200962417, 923768),
-  createData('Brazil', 'BR', 210147125, 8515767),
+const rows: Data[] = [
+  createData("India", "IN", 1324171354, 3287263),
+  createData("China", "CN", 1403500365, 9596961),
+  createData("Italy", "IT", 60483973, 301340),
+  createData("United States", "US", 327167434, 9833520),
+  createData("Canada", "CA", 37602103, 9984670),
+  createData("Australia", "AU", 25475400, 7692024),
+  createData("Germany", "DE", 83019200, 357578),
+  createData("Ireland", "IE", 4857000, 70273),
+  createData("Mexico", "MX", 126577691, 1972550),
+  createData("Japan", "JP", 126317000, 377973),
+  createData("France", "FR", 67022000, 640679),
+  createData("United Kingdom", "GB", 67545757, 242495),
+  createData("Russia", "RU", 146793744, 17098246),
+  createData("Nigeria", "NG", 200962417, 923768),
+  createData("Brazil", "BR", 210147125, 8515767),
 ];
 
-export default function StickyHeadTable() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+export default function DataTable() {
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+  const context = useContext(DataContext);
+  if (!context) return <div>Context not available</div>;
+  const { searchInput } = context;
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const filteredRows = rows.filter((row) =>
+  row.name.toLowerCase().includes(searchInput.toLowerCase()) ||
+  row.code.toLowerCase().includes(searchInput.toLowerCase())
+);
+
+  const paginatedRows = filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 4 }} className='rounded-lg' >
-      <TableContainer sx={{ maxHeight: 440}}>
-        <Table stickyHeader aria-label="sticky table" className='bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors rounded-lg'>
-          <TableHead>
-            <TableRow>
+    <div className="w-full p-6 bg-gray-100 dark:bg-gray-900 transition-colors">
+      <div className="overflow-x-auto rounded-xl shadow-lg bg-white dark:bg-gray-800 transition-colors">
+        <table className="min-w-full table-auto">
+          <thead className="sticky top-0 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 transition-colors">
+            <tr>
               {columns.map((column) => (
-                <TableCell
+                <th
                   key={column.id}
-                  align={column.align}
+                  className={`px-4 py-3 text-sm font-semibold ${
+                    column.align === "right" ? "text-right" : "text-left"
+                  }`}
                   style={{ minWidth: column.minWidth }}
-                  sx={{backgroundColor: "#1F2937"}}
                 >
                   {column.label}
-                </TableCell>
+                </th>
               ))}
-            </TableRow>
-          </TableHead>
-          <TableBody >
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <TableCell key={column.id} align={column.align}>
-                          {column.format && typeof value === 'number'
-                            ? column.format(value)
-                            : value}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors'
-      />
-    </Paper>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedRows.map((row) => (
+              <tr
+                key={row.code}
+                className="border-b border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-200 transition-colors"
+              >
+                {columns.map((column) => {
+                  const value = row[column.id];
+                  return (
+                    <td
+                      key={column.id}
+                      className={`px-4 py-2 text-sm ${
+                        column.align === "right" ? "text-right" : "text-left"
+                      } text-gray-900 dark:text-gray-100`}
+                    >
+                      {column.format && typeof value === "number" ? column.format(value) : value}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+
+
+      <div className="flex items-center justify-between mt-4 text-gray-900 dark:text-gray-200">
+        <div>
+          <select
+            value={rowsPerPage}
+            
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setPage(0);
+            }}
+            className="ml-2 p-0 mr-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-200"
+          >
+            {[10, 25, 100].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+         :تعداد ردیف ها 
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+            disabled={page >= totalPages - 1}
+            className="px-3 py-1 text-gray-900 dark:text-gray-200 disabled:opacity-50"
+          >
+            &lt;
+          </button>
+          <span>
+            صفحه {page + 1}  از {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+            disabled={page === 0}
+            className="px-3 py-1 text-gray-900 dark:text-gray-200 disabled:opacity-50"
+          >
+            &gt;
+          </button>
+          
+        </div>
+      </div>
+    </div>
   );
 }

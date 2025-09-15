@@ -1,9 +1,8 @@
 import React, { useContext, type ChangeEvent } from "react";
-import DataContext from "./dataContext";
-import SearchIcon from "@mui/icons-material/Search";
+import DataContext from "../contexts/dataContext";
 import { styled, alpha } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
-
+import SearchIcon from "@mui/icons-material/Search";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -34,13 +33,21 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
 const StyledInput = styled(InputBase)(({ theme }) => ({
   color: "inherit",
   width: "100%",
+  fontFamily: "Vazirmatn, sans-serif", 
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create("width"),
     width: "100%",
   },
+  "&::placeholder": {
+    fontFamily: "Vazirmatn, sans-serif",
+    fontSize: "1rem",
+    color: theme.palette.text.secondary,
+  },
 }));
+
+
 
 const SearchBar: React.FC = () => {
   const context = useContext(DataContext);
@@ -61,7 +68,7 @@ const SearchBar: React.FC = () => {
         <SearchIcon />
       </SearchIconWrapper>
       <StyledInput
-        placeholder="Search…"
+        placeholder="جستجو..."
         inputProps={{ "aria-label": "search" }}
         value={searchInput}
         onChange={handleChange}
