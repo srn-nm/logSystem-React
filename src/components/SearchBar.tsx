@@ -47,8 +47,6 @@ const StyledInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-
-
 const SearchBar: React.FC = () => {
   const context = useContext(DataContext);
 

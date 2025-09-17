@@ -8,7 +8,6 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
-
 export default function DataCard({ children }: { children: React.ReactNode }) {
   return (
     <div className='className="h-screen flex items-center justify-center rtl " style={{direction:"rtl"}}'>

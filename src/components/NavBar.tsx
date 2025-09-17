@@ -1,10 +1,5 @@
-import React, { useState } from "react";
-import MyDrawer from "./MiniDrawer";
-import { useDrawer } from "../states/useDrawer";
-import { motion } from "framer-motion";
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchBar from "./SearchBar";
-import List from "./List";
 
 
 interface DrawerOpenProps {
@@ -20,7 +15,6 @@ export default function NavBar({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
 
   return (
     <>
-    
       <nav className="flex items-center justify-between px-0 py-3 shadow-md transition-colors dark:bg-gray-800 dark:text-gray-200 bg-white text-gray-900" style={{ direction: "rtl" }}>
         <div className="flex items-center pr-4">
           <button

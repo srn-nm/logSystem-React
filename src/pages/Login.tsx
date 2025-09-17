@@ -3,7 +3,6 @@ import LoginForms from "../components/LoginForms";
 
 export default function LoginPage() {
 
-
   return (
     <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors rtl" style={{direction:"rtl"}}>
       <motion.div

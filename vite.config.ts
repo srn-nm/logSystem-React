@@ -9,4 +9,10 @@ export default defineConfig({
     port: 4000,
   },
   plugins: [react(),tailwindcss()],
+  // build: {
+  //   outDir: 'dist',
+  //   assetsDir: 'assets', //must be changed
+  //   sourcemap: true,
+  //   target: 'modules',
+  // },
 })
