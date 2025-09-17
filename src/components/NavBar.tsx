@@ -15,7 +15,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
 
   return (
     <>
-      <nav className="flex items-center justify-between px-0 py-3 shadow-md transition-colors dark:bg-gray-800 dark:text-gray-200 bg-white text-gray-900" style={{ direction: "rtl" }}>
+      <nav className="flex items-center justify-between px-0 py-1 shadow-md transition-colors dark:bg-gray-800 dark:text-gray-200 bg-white text-gray-900" style={{ direction: "rtl" }}>
         <div className="flex items-center pr-4">
           <button
             onClick={() => toggleDrawerOpen()}
@@ -30,11 +30,12 @@ export default function NavBar({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              sx={{color:"#d8d1d1ff"}}
             ></MenuIcon>
       
   
           </button>
-          <h1 className="text-xl font-bold transition-colors ">System Logs</h1>
+          <h1 className="text-l font-bold transition-colors ">System Logs</h1>
 
           <div className="absolute left-0 align-middle "><SearchBar ></SearchBar></div>
     

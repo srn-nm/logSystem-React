@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import HomeIcon from "@mui/icons-material/HomeFilled";
+import LogoutIcon from "@mui/icons-material/LogoutOutlined"
 
 const drawerWidth = 240;
 
@@ -32,7 +34,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
-  width: 60,
+  width: 55,
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.easeOut,
     duration: theme.transitions.duration.leavingScreen,
@@ -79,28 +81,29 @@ interface DrawerGroup {
   items: DrawerItem[];
   icon:  React.ReactNode;
   path?: string; 
+  iconandName: React.ReactNode;
 }
 
 const groups: DrawerGroup[] = [
   {
-    groupName: "Reports",
+    groupName: "Home",
     items: [], 
     path: "/",
-    icon: "",
+    icon: <HomeIcon></HomeIcon>,
+    iconandName : <><HomeIcon></HomeIcon><div className="pl-2">Home Page</div></> ,
+  },
+  {
+    groupName: "Logout",
+    items: [], 
+    path: "/Login",
+    icon: <LogoutIcon></LogoutIcon>,
+    iconandName: <><LogoutIcon></LogoutIcon><div className="pl-2">Logout</div></>
   },
   // {
   //   groupName: "Main",
   //   items: [
   //     { id: "1", label: "Dashboard", path: "/" },
   //     { id: "2", label: "Orders", path: "/orders" },
-  //   ],
-  //   icon: "",
-  // },
-  // {
-  //   groupName: "Management",
-  //   items: [
-  //     { id: "3", label: "Products", path: "/products" },
-  //     { id: "4", label: "Settings", path: "/settings" },
   //   ],
   //   icon: "",
   // },
@@ -132,11 +135,11 @@ export default function MiniDrawer({ drawerOpen, setDrawerOpen }: DrawerOpenProp
                   <Box className="flex items-center justify-between cursor-pointer px-1 mb-1" onClick={() => toggleGroup(group.groupName)}>
                     {drawerOpen ? (
                       <Typography variant="subtitle2" className="text-gray-500 dark:text-gray-400 uppercase text-xs"sx={{ fontSize: "1.1rem" }}>
-                        {group.groupName}
+                         {group.groupName}
                       </Typography>
                     ) : (
-                      
-                      <Box className="flex items-center justify-center w-full text-gray-500  dark:text-gray-400">
+
+                      <Box className="flex items-center justify-center w-full text-gray-500 dark:text-gray-400">
                         {group.icon}
                       </Box>
                     )}
@@ -150,14 +153,14 @@ export default function MiniDrawer({ drawerOpen, setDrawerOpen }: DrawerOpenProp
                 ) : (
                   <Button
                     onClick={() => group.path && navigate(group.path)}
-                    className="mb-2 text-left w-full text-gray-500 dark:text-gray-400 uppercase text-xs"
-                    sx={{ justifyContent: drawerOpen ? "flex-start" : "center", borderRadius: 2, textTransform: "none", fontSize: "1.125rem", "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" } }}>
-                    {drawerOpen ? group.groupName : group.icon }
+                    className="p-0 text-left w-full text-gray-500 dark:text-gray-400 uppercase text-2xs"
+                    sx={{ justifyContent: "flex-start", paddingLeft:"0px", borderRadius: 2, textTransform: "none", fontSize: "1rem", "&:hover": { backgroundColor: "rgba(201, 191, 191, 0.5)" }, color:"#d8d1d1ff"}}>
+                    {drawerOpen ? group.iconandName : group.icon }
                   </Button>
                 )}
 
                 {hasItems && isOpen && group.items.map((item) => (
-                    <Button key={item.id} onClick={() => navigate(item.path)} className="mb-2 text-left w-full " sx={{ justifyContent: "flex-start", borderRadius: 2, textTransform: "none", fontSize: "1.125rem", "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" }}}>
+                    <Button key={item.id} onClick={() => navigate(item.path)} className="mb-2 text-left w-full " sx={{ justifyContent: "flex-start", borderRadius: 2, textTransform: "none", fontSize: "1.125rem", "&:hover": { backgroundColor: "rgba(201, 191, 191, 0.5)" }}}>
                       {drawerOpen ? item.label : ""}
                     </Button>
                   ))}

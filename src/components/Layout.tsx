@@ -9,7 +9,7 @@ export default function Layout() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   return (
-   
+    
     <Box className="flex min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
       
       <Box className="flex flex-col flex-1">
@@ -24,11 +24,13 @@ export default function Layout() {
           <Outlet />
         </motion.main>
 
-        <footer className="flex items-center justify-center px-6 py-4 shadow-lg transition-colors dark:bg-gray-800 dark:text-white bg-white text-gray-900">
+        <footer className="flex items-center justify-center px-6 py-4 shadow-lg transition-colors dark:bg-gray-800 dark:text-white bg-white text-gray-900 text-xs">
           .تمامی حقوق متعلق به کیتکو می باشد
         </footer>
       </Box>
+
       <MiniDrawer drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen}/>
+  
     </Box>
   );
 }

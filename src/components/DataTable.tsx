@@ -84,8 +84,8 @@ export default function DataTable() {
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
   return (
-    <div className="w-full p-6 bg-gray-100 dark:bg-gray-900 transition-colors">
-      <div className="overflow-x-auto rounded-xl shadow-lg bg-white dark:bg-gray-800 transition-colors">
+    <div className="w-full bg-gray-100 dark:bg-gray-900 transition-colors">
+      <div className="overflow-x-auto rounded-l shadow-lg bg-white dark:bg-gray-800 transition-colors">
         <table className="min-w-full table-auto">
           <thead className="sticky top-0 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 transition-colors">
             <tr>
@@ -127,10 +127,8 @@ export default function DataTable() {
         </table>
       </div>
 
-
-
       <div className="flex items-center justify-between mt-4 text-gray-900 dark:text-gray-200">
-        <div>
+        <div className="text-sm">
           <select
             value={rowsPerPage}
             
@@ -148,7 +146,7 @@ export default function DataTable() {
           </select>
          :تعداد ردیف ها 
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-sm">
           <button
             onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
             disabled={page >= totalPages - 1}

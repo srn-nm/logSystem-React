@@ -1,7 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
 import "../style.css";
+import Cookies from "js-cookie"
 
 export default function PrivateRoute() {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  return isLoggedIn ? <Outlet /> : <Navigate to="/login" />;
+  const session = Cookies.get("session");
+  return session ? <Outlet /> : <Navigate to="/login" />;
 }

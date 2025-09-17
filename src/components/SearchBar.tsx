@@ -70,6 +70,7 @@ const SearchBar: React.FC = () => {
         inputProps={{ "aria-label": "search" }}
         value={searchInput}
         onChange={handleChange}
+        sx={{fontSize:"13px"}}
       />
     </Search>
   );

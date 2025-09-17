@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import LoginForms from "../components/LoginForms";
+import { GlobalStyles } from '@mui/material';
+
 
 export default function LoginPage() {
 
@@ -11,6 +13,14 @@ export default function LoginPage() {
         transition={{ duration: 0.6 }}
         className="bg-white/90 dark:bg-gray-800 p-10 rounded-2xl max-w-md w-full shadow-lg transition-colors"
       >
+        <GlobalStyles
+        styles={{
+          'input[type="password"]::-ms-reveal': {
+            filter: 'invert(100%)',
+          },
+        }}
+        />
+
         <LoginForms></LoginForms>
       </motion.div>
     </div>

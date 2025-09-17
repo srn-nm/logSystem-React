@@ -4,7 +4,7 @@ import DataTable from "../components/DataTable";
 export default function Home() {
 
   return (
-    <div className="flex flex-wrap gap-5 justify-stretch m-5">
+    <div className="flex flex-wrap justify-stretch m-2">
       <DataTable/>
     </div>
   );
