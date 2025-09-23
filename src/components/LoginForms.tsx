@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
-import axios from "axios";
+// import axios from "axios";
 
 
 type AuthForm = {username : string , password: string , authType: "USERPASS" | "LDAP" , type : "MOBILE" | "QR"}
@@ -40,33 +40,34 @@ export default function LoginForms() {
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
   
-    try { 
-      const response = await axios.get("http://172.16.20.173/api/v1/health",
-        {
-          headers: {
-            "Content-Type":"application/json"
-          },
-          withCredentials: true
-        }
-      )
+    // try { 
+    //   const response = await axios.get("http://172.16.20.173/api/v1/health",
+    //     {
+    //       headers: {
+    //         "Content-Type":"application/json"
+    //       },
+    //       withCredentials: true
+    //     }
+    //   )
 
-      const responseData =  JSON.stringify(response)
+    //   const responseData =  JSON.stringify(response)
       
-      console.log(response)
+    //   console.log(response)
 
-      // lets see if it works until here or not
+    //   // lets see if it works until here or not
 
-      localStorage.setItem("ID", responseData);
-      console.log("data(id): "+ localStorage.getItem("ID"))
+    //   localStorage.setItem("ID", responseData);
+    //   console.log("data(id): "+ localStorage.getItem("ID"))
       
-      send_sms_to_mobile();
+    // 
+    send_sms_to_mobile();
 
-      setStep("otp");
-      console.log("going to otp step...")
+    //   setStep("otp");
+    //   console.log("going to otp step...")
 
-    } catch (error: any) {
-      console.log("error: ", error);
-    }
+    // } catch (error: any) {
+    //   console.log("error: ", error);
+    // }
   }
 
   async function send_sms_to_mobile() {   
