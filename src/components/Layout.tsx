@@ -10,7 +10,7 @@ export default function Layout() {
 
   return (
     
-    <Box className="flex min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
+    <Box className="flex justify-end min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
       
       <Box className="flex flex-col flex-1">
         <NavBar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />

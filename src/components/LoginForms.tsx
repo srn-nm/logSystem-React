@@ -2,15 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import axios from "axios";
-import qs from "qs";
-
 
 type AuthForm = {username : string , password: string , authType: "USERPASS" | "LDAP" , type : "MOBILE" | "QR"}
+
+
 export default function LoginForms() {
+
   Cookies.remove("session");
 
   const navigate = useNavigate();
-
 
   const [userName, setUserName] = useState("")
   const [password, setPassword] = useState("")
@@ -41,6 +41,12 @@ export default function LoginForms() {
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    //////////////////////////////////// for testing... going through the login page without authentication
+    /// these two lines should be removed after testing
+    Cookies.set("session", "sample", { expires: 1 / 12 });
+    navigate("/");
+    ///////////////////////////////
   
     try { 
       const response = await axios.post("http://172.16.20.173/api/v1/authentication/login/challenge",
@@ -61,7 +67,7 @@ export default function LoginForms() {
       localStorage.setItem("ID", responseData);
       console.log("data(id): "+ localStorage.getItem("ID"))
       
-    send_sms_to_mobile();
+      send_sms_to_mobile();
 
       setStep("otp");
       console.log("going to otp step...")
@@ -84,28 +90,22 @@ export default function LoginForms() {
 
         let apiURL = "http://172.16.20.173/api/v1/authentication/login/challenge/{localStorage.getItem(\"ID\")}/mobile"
         console.log(apiURL)
-        const response = await fetch (apiURL , {
-            method: "POST",
+
+
+        const response = await axios.post(apiURL,
+          JSON.stringify({
+                  challengeID: localStorage.getItem("ID")
+              }),
+          {
             headers: {
-              "credentials":"include"
-            },
-            body: JSON.stringify({
-                challengeID: localStorage.getItem("ID")
-            })
-        })
+              'Content-Type': 'application/json'
+            }
+          }
+        )
 
         console.log("Request to Local Server send_sms_to_mobile was sent successfully.")
-
-        if (response.status == 200) {
-            console.log("SMS sent successfully.")
-            
-        } else {
-            console.log("SMS wasnt sent successfully.")
-            const error = await response.text();
-            console.log("Error " + response.status + " " + error )    
-            return;
-        }
-        
+        console.log("SMS sent successfully.")
+       
     } catch (error: any) {        
         console.log("Catched error: " + error)
     }
@@ -118,23 +118,21 @@ export default function LoginForms() {
       }
       try {//`http://172.16.20.173/api/v1/authentication/login/access-token`
           const apiURL = `http://localhost:4000//get_access_token`;
-          const response = await fetch(apiURL, {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json"
-              },
-              body: JSON.stringify({})
-          })
+          
 
-          if (!response.ok) {
-              let responseBody = await response.text()
-              console.log(responseBody);  
-              return null;
-          } else {
-              const token = await response.json();
-              console.log(token);
-              return token;              
-          }
+          const response = await axios.post(apiURL,
+            JSON.stringify({}),
+            {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+            ) 
+
+            const token = await response.data //must be checked with server
+            console.log(token);
+            return token;              
+          
       } catch(error: any) {
           console.log("Catched error in SMS verification: " + error.message)
           return null;
@@ -150,30 +148,28 @@ export default function LoginForms() {
       }
       try {//"http://172.16.20.173/api/v1/authentication/login/challenge/${ID}/mobile/verify"
           const apiURL = `http://localhost:4000/handle_SMS_verification`;
-          const response = await fetch(apiURL, {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
+
+          const response = await axios.post(apiURL,
+            JSON.stringify({
                   verificationCode: authenticationCode,
                   challengeID: localStorage.getItem("ID")
-              })
-          })
-
-          if (!response.ok) {
-              let responseBody = await response.text()
-              console.log(responseBody);  
-          } else {
-              // const data = await response.json(); // ba in data chi kar konim??
-              // console.log(data);
-              try {
-                Cookies.set("session", await getAccessToken(), { expires: 1 / 12 }); // 2 hours
-              } catch(error: any) {
-                console.log("Couldn't get access token. " + error.message)
+            }),
+            {
+              headers: {
+                'Content-Type': 'application/json'
               }
-              navigate("/"); 
+            }
+          )
+          
+          // const data = await response.json(); // ba in data chi kar konim??
+          // console.log(data);
+          try {
+            Cookies.set("session", await getAccessToken(), { expires: 1 / 12 }); // 2 hours
+          } catch(error: any) {
+            console.log("Couldn't get access token. " + error.message)
           }
+          navigate("/"); 
+          
       } catch(error: any) {
           console.log("Catched error in SMS verification: " + error.message)
       }
