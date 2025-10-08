@@ -5,7 +5,6 @@ import axios from "axios";
 
 type AuthForm = {username : string , password: string , authType: "USERPASS" | "LDAP" , type : "MOBILE" | "QR"}
 
-
 export default function LoginForms() {
 
   Cookies.remove("session");
@@ -160,7 +159,7 @@ export default function LoginForms() {
               }
             }
           )
-          
+
           // const data = await response.json(); // ba in data chi kar konim??
           // console.log(data);
           try {
