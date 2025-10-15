@@ -41,7 +41,7 @@ export default function DataTable() {
       }
     };
     fetchSchema();
-  }, []); // only once
+  }, []); //only once
 
   useEffect(() => {
     const fetchData = async () => {
