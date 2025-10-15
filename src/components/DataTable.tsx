@@ -1,13 +1,34 @@
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
+
+// id: int | None = mapped_column(default=None, primary_key=True)
+// api_key: uuid.UUID | None
+// ip_address: str
+// path: str
+// method: str
+// status_code: int
+// request_body: dict | list | None = mapped_column(default=None, sa_column=Column(JSON))
+// response_body: dict | list | None = mapped_column(default=None, sa_column=Column(JSON))
+// query_params: dict | None = mapped_column(default=None, sa_column=Column(JSON))
+// path_params: dict | None = mapped_column(default=None, sa_column=Column(JSON))
+// process_time: float
+// created_at: datetime
+
 import DataContext from "../contexts/dataContext";
 
 interface Column {
-  id: string;
-  label: string;
-  align?: "right" | "left";
-  type?: "string" | "number" | "date";
-  format?: string;
+  id: number; // | None = mapped_column(default=None, primary_key=True)
+  api_key: uuid.UUID | None;
+  ip_address: string
+  path: string;
+  method: string;
+  status_code: number
+  // request_body: dict | list | None = mapped_column(default=None, sa_column=Column(JSON))
+  // response_body: dict | list | None = mapped_column(default=None, sa_column=Column(JSON))
+  // query_params: dict | None = mapped_column(default=None, sa_column=Column(JSON))
+  // path_params: dict | None = mapped_column(default=None, sa_column=Column(JSON))
+  process_time: number;
+  yycreated_at: datetime
 }
 
 export default function DataTable() {
@@ -28,26 +49,39 @@ export default function DataTable() {
   };
 
   useEffect(() => {
-    const fetchSchema = async () => {
-      try {
-        const res = await axios.get("http://localhost:3001/api/schema");
-        const schema = Array.isArray(res.data)
-          ? res.data
-          : res.data.columns || [];
-        setColumns(schema);
-      } catch (err) {
-        console.error("Error fetching schema:", err);
-        setColumns([]);
-      }
-    };
-    fetchSchema();
+    // const fetchSchema = async () => {
+    //   try {
+    //     const res = await axios.get("http://localhost:3000/api/schema");
+    //     const schema = Array.isArray(res.data)
+    //       ? res.data
+    //       : res.data.columns || [];
+    //     setColumns(schema);
+    //   } catch (err) {
+    //     console.error("Error fetching schema:", err);
+    //     setColumns([]);
+    //   }
+    // };
+    // fetchSchema();
+
+    try {
+      const res = axios.get("http://localhost:3000/api/schema");
+      const schema = Array.isArray(res.data)
+        ? res.data
+        : res.data.columns || [];
+      setColumns(schema);
+    } catch (err) {
+      console.error("Error fetching schema:", err);
+      setColumns([]);
+    }
+
+    
   }, []); // only once
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:3001/api/data", {
+        const res = await axios.get("http://localhost:3000/api/data", {
           params: {
             page: page + 1,
             limit: rowsPerPage,
