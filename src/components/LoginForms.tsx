@@ -101,8 +101,6 @@ export default function LoginForms() {
             }
           }
         )
-
-        console.log("Request to Local Server send_sms_to_mobile was sent successfully.")
         console.log("SMS sent successfully.")
        
     } catch (error: any) {        
@@ -161,7 +159,7 @@ export default function LoginForms() {
           )
 
           // const data = await response.json(); // ba in data chi kar konim??
-          // console.log(data);
+
           try {
             Cookies.set("session", await getAccessToken(), { expires: 1 / 12 }); // 2 hours
           } catch(error: any) {

@@ -118,7 +118,7 @@ export default function DataTable() {
                 rows.map((row, rowIndex) => (
                   <tr
                     key={rowIndex}
-                    className="border-b border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-400 dark:text-gray-300"
+                    className="border-b border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-gray-400 dark:text-gray-300"
                   >
                     {columns.map((column) => (
                       <td
