@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+@theme {
+  --breakpoint-xs: 30rem;
+  --breakpoint-2xs: 20rem;
+}
 
 @font-face {
   font-family: 'Vazirmatn';

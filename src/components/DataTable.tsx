@@ -1,13 +1,23 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import DataContext from "../contexts/dataContext";
+import RefreshButton from "./RefteshButton";
+import Box from "@mui/material/Box";
 
-interface Column {
-  id: string;
-  label: string;
-  align?: "right" | "left";
-  type?: "string" | "number" | "date";
-  format?: string;
+interface ColumnsList {
+  id: number | null;
+  api_key: string | null;
+  ip_address: string;
+  path: string;
+  method: string;
+  status_code: number;
+  request_body?: Record<string, any> | any[] | null;
+  response_body?: Record<string, any> | any[] | null;
+  query_params?: Record<string, any> | null;
+  path_params?: Record<string, any> | null;
+  process_time: number;
+  created_at: Date;
 }
 
 export default function DataTable() {
@@ -15,167 +25,218 @@ export default function DataTable() {
   if (!context) return <div>Context not available</div>;
   const { searchInput } = context;
 
-  const [columns, setColumns] = useState<Column[]>([]);
-  const [rows, setRows] = useState<any[]>([]);
-  const [totalRows, setTotalRows] = useState(0);
+  const [rows, setRows] = useState<ColumnsList[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const [rowCount, setRowCount] = useState(0);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
 
-  const getNestedValue = (obj: any, path: string) => {
-    return path.split(".").reduce((acc, key) => acc?.[key], obj);
+  const [filter, setFilter] = useState<string>(""); // for mobile filtering
+
+  const handleRefresh = async () => {
+    fetchData(); 
   };
 
-  useEffect(() => {
-    const fetchSchema = async () => {
-      try {
-        const res = await axios.get("http://localhost:3001/api/schema");
-        const schema = Array.isArray(res.data)
-          ? res.data
-          : res.data.columns || [];
-        setColumns(schema);
-      } catch (err) {
-        console.error("Error fetching schema:", err);
-        setColumns([]);
-      }
-    };
-    fetchSchema();
-  }, []); //only once
+  const columns: GridColDef[] = [
+      { field: "id", headerName: "ID", flex: 1, minWidth: 50 },
+      { field: "api_key", headerName: "API Key", flex: 1, minWidth: 50 },
+      { field: "ip_address", headerName: "IP Address", flex: 1, minWidth: 50 },
+      { field: "path", headerName: "Path", flex: 1, minWidth: 50 },
+      { field: "method", headerName: "Method", flex: 1, minWidth: 50 },
+      { field: "status_code", headerName: "Status", flex: 1, minWidth: 50 },
+      {
+        field: "request_body",
+        headerName: "Request Body",
+        flex: 2,
+        minWidth: 50,
+        renderCell: (params: any) => (
+          <span className="truncate">
+            {JSON.stringify(params.value)?.slice(0, 80) || ""}
+          </span>
+        ),
+      },
+      {
+        field: "response_body",
+        headerName: "Response Body",
+        flex: 2,
+        minWidth: 50,
+        renderCell: (params: any) => (
+          <span className="truncate">
+            {JSON.stringify(params.value)?.slice(0, 80) || ""}
+          </span>
+        ),
+      },
+      { field: "process_time", headerName: "Time (ms)", flex: 1 ,minWidth: 50},
+      {
+        field: "created_at",
+        headerName: "Created At",
+        flex: 1.5,
+        minWidth: 50,
+        valueFormatter: (params: any) =>
+          new Date(params.value).toLocaleString("fa-IR"),
+      },
+  ];
 
-  useEffect(() => {
-    const fetchData = async () => {
+   const fetchData = async () => {
       setLoading(true);
+      await new Promise((res) => setTimeout(res, 1000));
       try {
         const res = await axios.get("http://localhost:3001/api/data", {
           params: {
             page: page + 1,
-            limit: rowsPerPage,
+            limit: pageSize,
             search: searchInput,
           },
         });
-        console.log(res.data)
-        setRows(res.data || []);
-        setTotalRows(res.data.length);
-      } catch (err) {
-        console.error("Error fetching data:", err);
+        const data = Array.isArray(res.data) ? res.data : [];
+        setRows(data);
+        setRowCount(data.length);
+      } catch (error) {
+        console.error("Error fetching data:", error);
         setRows([]);
-        setTotalRows(0);
+        setRowCount(0);
       } finally {
         setLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchData();
-  }, [page, rowsPerPage, searchInput]);
+  }, [page, pageSize, searchInput]);
 
-  const totalPages = Math.ceil(totalRows / rowsPerPage);
-
-  const formatValue = (value: any, column: Column) => {
-    if (value == null) return "";
-    if (column.type === "number" && typeof value === "number") {
-      if (column.format === "number") return value.toLocaleString("en-US");
-      if (column.format === "float2") return value.toFixed(2);
-    }
-    if (column.type === "date") {
-      const date = new Date(value);
-      return isNaN(date.getTime()) ? value : date.toLocaleString();
-    }
-    return value;
-  };
+  // filter rows for mobile
+  const filteredRows = rows.filter((row) =>
+    Object.values(row).some((val) =>
+      JSON.stringify(val).toLowerCase().includes(filter.toLowerCase())
+    )
+  );
 
   return (
-    <div className="w-full bg-gray-100 dark:bg-gray-900 transition-colors">
-      <div className="overflow-x-auto rounded-l shadow-lg bg-white dark:bg-gray-800 transition-colors">
-        {loading ? (
-          <div className="p-4 text-center">Loading...</div>
-        ) : (
-          <table className=" min-w-full table-auto ">
-            <thead className="sticky top-0 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 transition-colors">
-              <tr>
-                {columns.map((column) => (
-                  <th
-                    key={column.id}
-                    className={`px-4 py-3 text-sm font-semibold ${
-                      column.align === "right" ? "text-right" : "text-left"
-                    }`}
-                  >
-                    {column.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={columns.length}
-                    className="px-4 py-4 text-center text-gray-500"
-                  >
-                    No data found
-                  </td>
-                </tr>
-              ) : (
-                rows.map((row, rowIndex) => (
-                  <tr
-                    key={rowIndex}
-                    className="border-b border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-gray-400 dark:text-gray-300"
-                  >
-                    {columns.map((column) => (
-                      <td
-                        key={column.id}
-                        className={`px-4 py-2 text-sm ${
-                          column.align === "right" ? "text-right" : "text-left"
-                        }`}
-                      >
-                        {formatValue(getNestedValue(row, column.id), column)}
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
+    <>
+    <RefreshButton onRefresh={handleRefresh} loading={loading} />
+    <div className="w-full bg-gray-100 dark:bg-gray-900 transition-colors p-4" >
+      {/* Desktop DataGrid */}
+      <div className="hidden lg:block rounded-lg shadow-lg bg-white dark:bg-gray-800 transition-colors ">
+        <Box sx={{ flex: 1, position: 'relative' }}>
+        <Box sx={{ position: 'absolute', inset: 0 }}>
+        <DataGrid
+          autoHeight
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          pagination
+          paginationMode="server"
+          paginationModel={{ page, pageSize }}
+          onPaginationModelChange={(model) => {
+            setPage(model.page);
+            setPageSize(model.pageSize);
+          }}
+          rowCount={rowCount}
+          pageSizeOptions={[10, 25, 100]}
+          disableRowSelectionOnClick
+          disableColumnResize
+          filterMode="client"
+          sortingMode="client"
+          sx={{
+            height: "100%",
+            width: "100%",
+            minWidth: 0,
+            overflow: "hidden",
+            color: "var(--mui-palette-text-primary)",
+            backgroundColor: "var(--mui-palette-background-paper)",
+            "& .MuiDataGrid-columnHeader": {
+              backgroundColor: "#374151", 
+              color: "#e5e7eb", 
+            },
+            "& .MuiDataGrid-cell": {
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: "#e5e7eb",
+              borderBottom: "1px solid #4b5563",
+            },
+            "& .MuiDataGrid-footerContainer": {
+              backgroundColor: "#1f2937",
+              color: "#e5e7eb",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: "#1f2937",
+            },
+            "& .MuiDataGrid-row:hover": {
+            backgroundColor: "#4b5563",
+            color: "#f9fafb",     
+            },
+            "& .MuiTablePagination-root": {
+              color: "#e5e7eb", 
+            },
+            "& .MuiTablePagination-select": {
+              color: "#e5e7eb",            
+              backgroundColor: "#374151",   
+            },
+            "& .MuiSelect-icon": {
+              color: "#e5e7eb",    
+            },
+            
+          
+          }}
+        />
+        </Box>
+        </Box>
       </div>
 
-      <div className="flex items-center justify-between mt-4 text-gray-900 dark:text-gray-200">
-        <div className="text-sm">
-          <select
-            value={rowsPerPage}
-            onChange={(e) => {
-              setRowsPerPage(Number(e.target.value));
-              setPage(0);
-            }}
-            className="ml-2 mr-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-200"
-          >
-            {[10, 25, 100].map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-          : تعداد ردیف ها
+      {/* Mobile Card Format */}
+      <div className="lg:hidden mt-4 space-y-4">
+        <div className="flex items-center justify-center mb-3">
+          <input
+            type="text"
+            placeholder="فیلتر کنید..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="w-full max-w-md px-3 py-2 rounded-lg border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-        <div className="flex items-center gap-2 text-sm">
-          <button
-            onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-            disabled={page === 0}
-            className="px-3 py-1 disabled:opacity-50"
-          >
-            &lt;
-          </button>
-          <span>
-            صفحه {page + 1} از {totalPages || 1}
-          </span>
-          <button
-            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-            disabled={page >= totalPages - 1}
-            className="px-3 py-1 disabled:opacity-50"
-          >
-            &gt;
-          </button>
-        </div>
+
+        {loading ? (
+          <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+            در حال بارگذاری...
+          </div>
+        ) : filteredRows.length === 0 ? (
+          <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+            داده‌ای یافت نشد
+          </div>
+        ) : (
+          filteredRows.map((row, idx) => (
+            <div
+              key={idx}
+              className="border rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+            >
+              <table className="w-full table-auto">
+                {columns.map((col) => (
+                  <tr
+                    key={col.field}
+                    className="border-b border-gray-300 dark:border-gray-600"
+                  >
+                    <th className="px-4 py-2 text-left text-sm font-medium w-1/3 bg-gray-100 dark:bg-gray-700">
+                      {col.headerName}
+                    </th>
+                    <td className="px-4 py-2 text-sm w-2/3">
+                      {(() => {
+                        const val = (row as any)[col.field];
+                        if (val == null) return "";
+                        if (typeof val === "object")
+                          return JSON.stringify(val).slice(0, 80);
+                        return String(val);
+                      })()}
+                    </td>
+                  </tr>
+                ))}
+              </table>
+            </div>
+          ))
+        )}
       </div>
     </div>
+    </>
   );
 }
+
