@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import DataContext from "../contexts/dataContext";
@@ -37,38 +37,34 @@ export default function DataTable() {
     fetchData(); 
   };
 
-  const columns: GridColDef[] = [
+  const deskColumns: GridColDef[] = [
       { field: "id", headerName: "ID", flex: 1, minWidth: 50 },
-      { field: "api_key", headerName: "API Key", flex: 1, minWidth: 50 },
       { field: "ip_address", headerName: "IP Address", flex: 1, minWidth: 50 },
       { field: "path", headerName: "Path", flex: 1, minWidth: 50 },
       { field: "method", headerName: "Method", flex: 1, minWidth: 50 },
       { field: "status_code", headerName: "Status", flex: 1, minWidth: 50 },
-      {
-        field: "request_body",
-        headerName: "Request Body",
-        flex: 2,
-        minWidth: 50,
-        renderCell: (params: any) => (
-          <span className="truncate">
-            {JSON.stringify(params.value)?.slice(0, 80) || ""}
-          </span>
-        ),
-      },
-      {
-        field: "response_body",
-        headerName: "Response Body",
-        flex: 2,
-        minWidth: 50,
-        renderCell: (params: any) => (
-          <span className="truncate">
-            {JSON.stringify(params.value)?.slice(0, 80) || ""}
-          </span>
-        ),
-      },
-      { field: "process_time", headerName: "Time (ms)", flex: 1 ,minWidth: 50},
-      {
-        field: "created_at",
+      // { field: "request_body",
+      //   headerName: "Request Body",
+      //   flex: 2,
+      //   minWidth: 50,
+      //   renderCell: (params: any) => (
+      //     <span className="truncate">
+      //       {JSON.stringify(params.value)?.slice(0, 80) || ""}
+      //     </span>
+      //   ),
+      // },
+      // { field: "response_body",
+      //   headerName: "Response Body",
+      //   flex: 2,
+      //   minWidth: 50,
+      //   renderCell: (params: any) => (
+      //     <span className="truncate">
+      //       {JSON.stringify(params.value)?.slice(0, 80) || ""}
+      //     </span>
+      //   ),
+      // },
+      { field: "process_time", headerName: "Process Time (ms)", flex: 1 ,minWidth: 50},
+      { field: "created_at",
         headerName: "Created At",
         flex: 1.5,
         minWidth: 50,
@@ -119,10 +115,11 @@ export default function DataTable() {
       <div className="hidden lg:block rounded-lg shadow-lg bg-white dark:bg-gray-800 transition-colors ">
         <Box sx={{ flex: 1, position: 'relative' }}>
         <Box sx={{ position: 'absolute', inset: 0 }}>
+        <Box sx={{ height: "calc(100vh - 230px)", width: "100%" }}>
         <DataGrid
-          autoHeight
+          autoHeight={false}
           rows={rows}
-          columns={columns}
+          columns={deskColumns}
           loading={loading}
           pagination
           paginationMode="server"
@@ -176,10 +173,9 @@ export default function DataTable() {
             "& .MuiSelect-icon": {
               color: "#e5e7eb",    
             },
-            
-          
           }}
         />
+        </Box>
         </Box>
         </Box>
       </div>
@@ -211,7 +207,7 @@ export default function DataTable() {
               className="border rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
             >
               <table className="w-full table-auto">
-                {columns.map((col) => (
+                {deskColumns.map((col) => (
                   <tr
                     key={col.field}
                     className="border-b border-gray-300 dark:border-gray-600"
@@ -239,4 +235,3 @@ export default function DataTable() {
     </>
   );
 }
-
