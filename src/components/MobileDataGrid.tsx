@@ -26,17 +26,10 @@ export default function MobileDataGrid({
     { field: "id", headerName: "ID", flex: 1 },
     { field: "ip_address", headerName: "IP", flex: 1 },
     { field: "status_code", headerName: "Status", flex: 1 },
-    {
-      field: "details",
-      headerName: "Details",
-      width: 70,
-      sortable: false,
-      renderCell: () => <DetailsButton />,
-    },
+    { field: "details", headerName: "Details", width: 70, sortable: false, renderCell: () => <DetailsButton />, },
   ];
 
   return (
-    <Box sx={{ height: "calc(100vh - 250px)", width: "100%" }}>
     <Box sx={{ flex: 1, position: 'relative' }}>
     <Box sx={{ position: 'absolute', inset: 0 }}>
     <Box sx={{ height: "calc(100vh - 250px)", width: "100%" }}>
@@ -54,9 +47,16 @@ export default function MobileDataGrid({
         rowCount={rowCount}
         pageSizeOptions={[10, 25, 100]}
         disableRowSelectionOnClick
+        scrollbarSize={0} 
         sx={gridStyle}
+        onFilterModelChange={(filterModel) => {
+          // fetchDataFromBackend({
+          //   page,
+          //   pageSize,
+          //   filters: filterModel.items,
+          // });
+        }}
       />
-    </Box>
     </Box>
     </Box>
     </Box>
@@ -96,5 +96,17 @@ const gridStyle = {
     }, 
     "& .MuiSelect-icon": { 
         color: "#e5e7eb",
+    },
+
+    "& ::-webkit-scrollbar": {
+    width: "10px"
+    },
+    "& ::-webkit-scrollbar-track": {
+      backgroundColor: "#1f2937"
+    },
+    "& ::-webkit-scrollbar-thumb": {
+      borderRadius: "10px",
+      boxShadow: "inset 0 0 6px rgba(0,0,0,.3)",
+      backgroundColor: "#4b5563"
     },
 };

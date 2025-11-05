@@ -13,7 +13,7 @@ export default function LoadingIconButton() {
   });
 
   return (
-    <Tooltip title="دیدن جزئیات...">
+    <Tooltip title="Show Details">
       <IconButton onClick={() => setLoading(true)} size="small">
         <InfoIcon color="primary" />
       </IconButton>

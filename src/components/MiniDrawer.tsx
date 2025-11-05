@@ -192,6 +192,8 @@ export default function MiniDrawer({ drawerOpen, setDrawerOpen }: DrawerOpenProp
               width: drawerOpen ? drawerWidth : 55,
               boxShadow: "-4px 0 10px rgba(0,0,0,0.5)",
               borderLeft: "1px solid black",
+              overflowY: drawerOpen ? "auto" : "hidden", // ← add this line
+              overflowX: "hidden", // optional
             },
           }}
         >

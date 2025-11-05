@@ -30,26 +30,11 @@ export default function DesktopDataGrid({
     { field: "method", headerName: "Method", flex: 1, minWidth: 50 },
     { field: "status_code", headerName: "Status", flex: 1, minWidth: 50 },
     { field: "process_time", headerName: "Process Time (ms)", flex: 1, minWidth: 50 },
-    {
-      field: "created_at",
-      headerName: "Created At",
-      flex: 1.5,
-      minWidth: 50,
-      valueFormatter: (params) =>
-        new Date(params as string).toLocaleString("en-US"),
-    },
-    {
-      field: "details",
-      headerName: "Details",
-      minWidth: 70,
-      flex: 0.5,
-      sortable: false,
-      renderCell: () => <DetailsButton />,
-    },
+    { field: "created_at", headerName: "Created At", flex: 1.5, minWidth: 50, valueFormatter: (params) => new Date(params as string).toLocaleString("en-US"), },
+    { field: "details", headerName: "Details", minWidth: 70, flex: 0.5, sortable: false, renderCell: () => <DetailsButton />, },
   ];
 
   return (
-    <Box sx={{ height: "calc(100vh - 200px)", width: "100%" }}>
     <Box sx={{ flex: 1, position: 'relative' }}>
     <Box sx={{ position: 'absolute', inset: 0 }}>
     <Box sx={{ height: "calc(100vh - 250px)", width: "100%" }}>
@@ -67,13 +52,20 @@ export default function DesktopDataGrid({
         rowCount={rowCount}
         pageSizeOptions={[10, 25, 100]}
         disableRowSelectionOnClick
+        scrollbarSize={0} 
         sx={gridStyle}
+
+        onFilterModelChange={(filterModel) => {
+          // fetchDataFromBackend({
+          //   page,
+          //   pageSize,
+          //   filters: filterModel.items,
+          // });
+        }}
       />
     </Box>
     </Box>
-    </Box>
-    </Box>
-    
+    </Box>    
   );
 }
 
@@ -106,9 +98,23 @@ const gridStyle = {
         color: "#e5e7eb", 
     }, 
     "& .MuiTablePagination-select": { 
-        color: "#e5e7eb", backgroundColor: "#374151",
-    }, 
-    "& .MuiSelect-icon": { 
         color: "#e5e7eb",
+        backgroundColor: "#374151",
+    }, 
+       "& .MuiSelect-icon": { 
+        color: "#e5e7eb",
+    },
+
+
+    "& ::-webkit-scrollbar": {
+    width: "10px"
+    },
+    "& ::-webkit-scrollbar-track": {
+      backgroundColor: "#1f2937"
+    },
+    "& ::-webkit-scrollbar-thumb": {
+      borderRadius: "10px",
+      boxShadow: "inset 0 0 6px rgba(0,0,0,.3)",
+      backgroundColor: "#4b5563"
     },
 };
