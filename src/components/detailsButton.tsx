@@ -2,7 +2,11 @@ import InfoIcon from '@mui/icons-material/Info';
 import React from "react";
 import { IconButton, Tooltip } from "@mui/material";
 
-export default function LoadingIconButton() {
+interface DetailsButtonProps {
+  logID: string;
+}
+
+export default function DetailsButton({ logID }: DetailsButtonProps) {
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
@@ -14,8 +18,8 @@ export default function LoadingIconButton() {
 
   return (
     <Tooltip title="Show Details">
-      <IconButton onClick={() => setLoading(true)} size="small">
-        <InfoIcon color="primary" />
+      <IconButton onClick={() => setLoading(true)} loading={loading} size="small">
+        <InfoIcon style={{ color: "#e5e7eb" }}/>
       </IconButton>
     </Tooltip>
   );

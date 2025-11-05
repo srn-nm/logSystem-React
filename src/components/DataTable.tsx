@@ -59,8 +59,8 @@ export default function Table() {
     <>
       <div className="pl-4">
         <Tooltip title="Refresh">
-          <IconButton onClick={fetchTableData} disabled={loading} size="small">
-            <RefreshIcon color="primary" />
+          <IconButton onClick={fetchTableData} loading={loading} size="small" sx={{paddingTop:"10px"}} >
+            <RefreshIcon style={{ color: "#e5e7eb" }} />
           </IconButton>
         </Tooltip>
       </div>

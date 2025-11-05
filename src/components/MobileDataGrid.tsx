@@ -1,6 +1,6 @@
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
-import DetailsButton from "./detailsButton";
+import DetailsButton from "./DetailsButton";
 import type { ColumnsList } from "./DataTable";
 
 interface Props {
@@ -26,7 +26,7 @@ export default function MobileDataGrid({
     { field: "id", headerName: "ID", flex: 1 },
     { field: "ip_address", headerName: "IP", flex: 1 },
     { field: "status_code", headerName: "Status", flex: 1 },
-    { field: "details", headerName: "Details", width: 70, sortable: false, renderCell: () => <DetailsButton />, },
+    { field: "details", headerName: "Details", width: 70, sortable: false, renderCell: (params) => <DetailsButton logID={params.row.id} />, },
   ];
 
   return (

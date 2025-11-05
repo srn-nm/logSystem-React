@@ -1,7 +1,7 @@
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { DataGrid, type GridColDef, } from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
-import DetailsButton from "./detailsButton";
 import type { ColumnsList } from "./DataTable";
+import DetailsButton from "./DetailsButton";
 
 interface Props {
   rows: ColumnsList[];
@@ -13,15 +13,7 @@ interface Props {
   setPageSize: (s: number) => void;
 }
 
-export default function DesktopDataGrid({
-  rows,
-  loading,
-  rowCount,
-  page,
-  pageSize,
-  setPage,
-  setPageSize,
-}: Props) {
+export default function DesktopDataGrid({ rows, loading, rowCount, page, pageSize, setPage, setPageSize, }: Props) {
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 1, minWidth: 50 },
@@ -31,13 +23,13 @@ export default function DesktopDataGrid({
     { field: "status_code", headerName: "Status", flex: 1, minWidth: 50 },
     { field: "process_time", headerName: "Process Time (ms)", flex: 1, minWidth: 50 },
     { field: "created_at", headerName: "Created At", flex: 1.5, minWidth: 50, valueFormatter: (params) => new Date(params as string).toLocaleString("en-US"), },
-    { field: "details", headerName: "Details", minWidth: 70, flex: 0.5, sortable: false, renderCell: () => <DetailsButton />, },
+    { field: "details", headerName: "Details", minWidth: 70, flex: 0.5, sortable: false, renderCell: (params) => <DetailsButton logID={params.row.id} />, },
   ];
 
   return (
     <Box sx={{ flex: 1, position: 'relative' }}>
     <Box sx={{ position: 'absolute', inset: 0 }}>
-    <Box sx={{ height: "calc(100vh - 250px)", width: "100%" }}>
+    <Box sx={{ height: "calc(100vh - 200px)", width: "100%" }}>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -72,49 +64,49 @@ export default function DesktopDataGrid({
 const gridStyle = {
   color: "#e5e7eb",
   backgroundColor: "#1f2937",
-    "& .MuiDataGrid-columnHeader": { 
-        backgroundColor: "#374151",
-        color: "#e5e7eb", 
-    }, 
-    "& .MuiDataGrid-cell": { 
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis", 
-        color: "#e5e7eb", 
-        borderBottom: "1px solid #4b5563",
-    }, 
-    "& .MuiDataGrid-footerContainer": { 
-        backgroundColor: "#1f2937", 
-        color: "#e5e7eb", 
-    }, 
-    "& .MuiDataGrid-virtualScroller": {
-         backgroundColor: "#1f2937",
-    }, 
-    "& .MuiDataGrid-row:hover": { 
-        backgroundColor: "#4b5563", 
-        color: "#f9fafb", 
-    },
-    "& .MuiTablePagination-root": { 
-        color: "#e5e7eb", 
-    }, 
-    "& .MuiTablePagination-select": { 
-        color: "#e5e7eb",
-        backgroundColor: "#374151",
-    }, 
-       "& .MuiSelect-icon": { 
-        color: "#e5e7eb",
-    },
+  "& .MuiDataGrid-columnHeader": { 
+      backgroundColor: "#374151",
+      color: "#e5e7eb", 
+  }, 
+  "& .MuiDataGrid-cell": { 
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis", 
+      color: "#e5e7eb", 
+      borderBottom: "1px solid #4b5563",
+  }, 
+  "& .MuiDataGrid-footerContainer": { 
+      backgroundColor: "#1f2937", 
+      color: "#e5e7eb", 
+  }, 
+  "& .MuiDataGrid-virtualScroller": {
+        backgroundColor: "#1f2937",
+  }, 
+  "& .MuiDataGrid-row:hover": { 
+      backgroundColor: "#4b5563", 
+      color: "#f9fafb", 
+  },
+  "& .MuiTablePagination-root": { 
+      color: "#e5e7eb", 
+  }, 
+  "& .MuiTablePagination-select": { 
+      color: "#e5e7eb",
+      backgroundColor: "#374151",
+  }, 
+  "& .MuiSelect-icon": { 
+      color: "#e5e7eb",
+  },
 
-
-    "& ::-webkit-scrollbar": {
-    width: "10px"
-    },
-    "& ::-webkit-scrollbar-track": {
-      backgroundColor: "#1f2937"
-    },
-    "& ::-webkit-scrollbar-thumb": {
-      borderRadius: "10px",
-      boxShadow: "inset 0 0 6px rgba(0,0,0,.3)",
-      backgroundColor: "#4b5563"
-    },
+  
+  "& ::-webkit-scrollbar": {
+  width: "10px"
+  },
+  "& ::-webkit-scrollbar-track": {
+    backgroundColor: "#1f2937"
+  },
+  "& ::-webkit-scrollbar-thumb": {
+    borderRadius: "10px",
+    boxShadow: "inset 0 0 6px rgba(0,0,0,.3)",
+    backgroundColor: "#4b5563"
+  },
 };
