@@ -1,10 +1,6 @@
 import React, { useState } from "react";
-import MuiDrawer from "@mui/material/Drawer";
+import { IconButton, Button, Box, Drawer, Typography} from "@mui/material";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CloseIcon from "@mui/icons-material/Close";
@@ -62,7 +58,7 @@ const groups: DrawerGroup[] = [
   },
 ];
 
-const PermanentDrawer = styled(MuiDrawer)(({ theme }) => ({
+const PermanentDrawer = styled(Drawer)(({ theme }) => ({
   flexShrink: 0,
   whiteSpace: "nowrap",
   boxSizing: "border-box",

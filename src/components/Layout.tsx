@@ -16,7 +16,7 @@ export default function Layout() {
         <NavBar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
 
         <motion.main
-          className="flex-1 p-5 mt-2 h-full stretch"
+          className="flex-1 h-full stretch"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}

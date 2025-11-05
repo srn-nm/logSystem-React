@@ -32,7 +32,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
         </h1>
       </div>
 
-      <div className="w-full lg:w-auto mt-2 lg:mt-0 lg:absolute lg:left-4">
+      <div className="w-full mt-2 lg:w-auto lg:mt-0 lg:absolute lg:left-4">
         <SearchBar />
       </div>
     </nav>
