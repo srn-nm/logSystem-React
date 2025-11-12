@@ -4,11 +4,12 @@ import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CloseIcon from "@mui/icons-material/Close";
-import HomeIcon from "@mui/icons-material/HomeFilled";
 import LogoutIcon from "@mui/icons-material/LogoutOutlined";
 import { useNavigate } from "react-router-dom";
 import { styled, useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import TableChartIcon from '@mui/icons-material/TableChart';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 const drawerWidth = 240;
 
@@ -33,14 +34,26 @@ interface DrawerGroup {
 
 const groups: DrawerGroup[] = [
   {
-    groupName: "Home",
+    groupName: "Dashboard",
     items: [],
-    path: "/",
-    icon: <HomeIcon />,
+    path: "/Dashboard",
+    icon: <BarChartIcon />,
     iconandName: (
       <>
-        <HomeIcon />
-        <div className="pl-2">Home Page</div>
+        <BarChartIcon />
+        <div className="pl-2">Dashboard</div>
+      </>
+    ),
+  },
+  {
+    groupName: "Logs",
+    items: [],
+    path: "/Logs",
+    icon: <TableChartIcon />,
+    iconandName: (
+      <>
+        <TableChartIcon />
+        <div className="pl-2">Logs Table</div>
       </>
     ),
   },
@@ -56,6 +69,7 @@ const groups: DrawerGroup[] = [
       </>
     ),
   },
+  
 ];
 
 const PermanentDrawer = styled(Drawer)(({ theme }) => ({
@@ -192,8 +206,8 @@ export default function MiniDrawer({ drawerOpen, setDrawerOpen }: DrawerOpenProp
               width: drawerOpen ? drawerWidth : 55,
               boxShadow: "-4px 0 10px rgba(0,0,0,0.5)",
               borderLeft: "1px solid black",
-              overflowY: drawerOpen ? "auto" : "hidden", // ← add this line
-              overflowX: "hidden", // optional
+              overflowY: drawerOpen ? "auto" : "hidden", 
+              overflowX: "hidden", 
             },
           }}
         >

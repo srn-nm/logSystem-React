@@ -21,7 +21,7 @@ export interface ColumnsList {
   created_at: Date;
 }
 
-export default function Table() {
+export default function logTable() {
   const context = useContext(DataContext);
   if (!context) return <div>Context not available</div>;
   const { searchInput } = context;
@@ -34,7 +34,7 @@ export default function Table() {
 
   const fetchTableData = async () => {
     setLoading(true);
-    await new Promise((res) => setTimeout(res, 500));
+    // await new Promise((res) => setTimeout(res, 500));
     try {
       const res = await axios.get("http://localhost:3000/api/data", {
         params: { page: page + 1, limit: pageSize, search: searchInput },

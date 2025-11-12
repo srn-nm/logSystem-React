@@ -1,11 +1,11 @@
 import "../style.css";
-import DataTable from "../components/DataTable";
+import LogTable from "../components/LogTable";
 
-export default function Home() {
+export default function Logs() {
 
   return (
     <div className="flex flex-wrap justify-stretch m-2">
-      <DataTable/>
+      <LogTable/>
     </div>
   );
 }

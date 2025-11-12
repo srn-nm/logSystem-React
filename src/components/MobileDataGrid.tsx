@@ -1,7 +1,7 @@
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
 import DetailsButton from "./DetailsButton";
-import type { ColumnsList } from "./DataTable";
+import type { ColumnsList } from "./LogTable";
 
 interface Props {
   rows: ColumnsList[];
