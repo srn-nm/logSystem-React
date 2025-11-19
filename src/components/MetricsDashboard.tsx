@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { IconButton, Tooltip } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import DataContext from "../contexts/dataContext";
+import axios from "axios";
 
 interface MetricType {
   labels: Record<string, string>;
@@ -730,41 +731,43 @@ export default function MetricsDashboard() {
 
   async function fetchMetrics() {
     setLoading(true);
-    try {
-      // using hardcoded data for testing
-      const parsedToJSON = parseMetrics(hardCodedMetricData);
-      setMetrics(parsedToJSON);
+    
+    // try {
+    //   // using hardcoded data for testing
+    //   const parsedToJSON = parseMetrics(hardCodedMetricData);
+    //   setMetrics(parsedToJSON);
       
-      // selecting metric when reloaded
+    //   // selecting metric when reloaded
+    //   if (!selectedMetric) {
+    //     const firstMetric = Object.keys(parsedToJSON)[0];
+    //     if (firstMetric) {
+    //       setSelectedMetric(firstMetric);
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error("Error fetching data:", error);
+    // } finally {
+    //   setLoading(false);
+    // }
+
+    try {
+      const res = await axios.get("http://172.16.20.173/metrics");
+      
+      const parsedToJSON = parseMetrics(res.data);
+      setMetrics(parsedToJSON);
       if (!selectedMetric) {
         const firstMetric = Object.keys(parsedToJSON)[0];
         if (firstMetric) {
           setSelectedMetric(firstMetric);
         }
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
+      console.log("fetching data from metrics successful", parsedToJSON);
+      
+    } catch(error) {
+      console.error("error fetching data:", error);
     } finally {
       setLoading(false);
     }
-
-    // setLoading(true);
-    // try {
-    //   const res = await axios.get("http://172.16.20.173/metrics", {
-    //     headers: {
-    //       'Content-Type': 'application/json'
-    //     }
-    //   });
-      
-    //   const parsedToJSON = parseMetrics(res.data);
-    //   setMetrics(parsedToJSON);
-    //   console.log("fetching data from metrics successful", parsedToJSON);
-      
-    // } catch(error) {
-    //   console.error("Error fetching data:", error);
-    // } finally {
-    //   setLoading(false);
-    // }
   }
 
   useEffect(() => {
@@ -780,7 +783,6 @@ export default function MetricsDashboard() {
       )
     )
     )].filter(Boolean);
-    console.log("distinct status: " + distinctStatus)
 
     const distinctMethods = [...new Set(
       Object.values(metrics).flatMap(metricArray =>
