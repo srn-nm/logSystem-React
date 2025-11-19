@@ -46,7 +46,6 @@ export default function DesktopDataGrid({ rows, loading, rowCount, page, pageSiz
         disableRowSelectionOnClick
         scrollbarSize={0} 
         sx={gridStyle}
-
         onFilterModelChange={(filterModel) => {
           // fetchDataFromBackend({
           //   page,

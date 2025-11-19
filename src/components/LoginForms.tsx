@@ -115,15 +115,14 @@ export default function LoginForms() {
       }
       try {//`http://172.16.20.173/api/v1/authentication/login/access-token`
           const apiURL = `http://localhost:4000//get_access_token`;
-          
 
           const response = await axios.post(apiURL,
-            JSON.stringify({}),
-            {
-              headers: {
-                'Content-Type': 'application/json'
+              JSON.stringify({}),
+              {
+                headers: {
+                  'Content-Type': 'application/json'
+                }
               }
-            }
             ) 
 
             const token = await response.data //must be checked with server
