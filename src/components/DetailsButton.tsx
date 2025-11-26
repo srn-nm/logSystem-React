@@ -3,7 +3,7 @@ import React from "react";
 import { IconButton, Tooltip } from "@mui/material";
 
 interface DetailsButtonProps {
-  logID: string;
+  logID: string|number|null;
 }
 
 export default function DetailsButton({ logID }: DetailsButtonProps) {

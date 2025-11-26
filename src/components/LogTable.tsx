@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { IconButton, Tooltip } from "@mui/material";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import DataContext from "../contexts/dataContext";
 import DesktopDataGrid from "./DesktopDataGrid";
 import MobileDataGrid from "./MobileDataGrid";
+import { RefreshButton } from "./RefreshButton";
 
 export interface ColumnsList {
   id: number | null;
@@ -58,11 +57,11 @@ export default function logTable() {
   return (
     <>
       <div className="pl-4">
-        <Tooltip title="Refresh">
-          <IconButton onClick={fetchTableData} loading={loading} size="small" sx={{paddingTop:"10px"}} >
-            <RefreshIcon style={{ color: "#e5e7eb" }} />
-          </IconButton>
-        </Tooltip>
+        <RefreshButton 
+          onRefresh={fetchTableData} 
+          loading={loading}
+          tooltipTitle="Refresh Table Data"
+        />
       </div>
 
       <div className="w-full bg-gray-100 dark:bg-gray-900 transition-colors p-4">

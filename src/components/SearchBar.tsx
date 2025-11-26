@@ -66,7 +66,7 @@ const SearchBar: React.FC = () => {
         <SearchIcon />
       </SearchIconWrapper>
       <StyledInput
-        placeholder="جستجو..."
+        placeholder="...Search"
         inputProps={{ "aria-label": "search" }}
         value={searchInput}
         onChange={handleChange}

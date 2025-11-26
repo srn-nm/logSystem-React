@@ -1,8 +1,7 @@
 import { useState, useEffect, useContext } from "react";
-import { IconButton, Tooltip } from "@mui/material";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import DataContext from "../contexts/dataContext";
 import axios from "axios";
+import { RefreshButton } from "./RefreshButton";
 
 interface MetricType {
   labels: Record<string, string>;
@@ -721,78 +720,60 @@ http_request_duration_seconds_created{handler="/api/v1/schemas/",method="GET"} 1
 export default function MetricsDashboard() {
   const context = useContext(DataContext);
   const searchInput = context?.searchInput || "";
+  type StatusType = "" | "2xx" | "3xx" | "4xx" | "5xx"; 
+  type MethodType = "" | "OPTIONS" | "GET" | "POST" | "PATCH" | "PUT" | "DELETE"; 
 
   const [metrics, setMetrics] = useState<Metrics>({});
   const [loading, setLoading] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<string>("");
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
-  const [selectedMethod, setSelectedMethod] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<StatusType>("");
+  const [selectedMethod, setSelectedMethod] = useState<MethodType>("");
 
 
   async function fetchMetrics() {
     setLoading(true);
     
-    // try {
-    //   // using hardcoded data for testing
-    //   const parsedToJSON = parseMetrics(hardCodedMetricData);
-    //   setMetrics(parsedToJSON);
-      
-    //   // selecting metric when reloaded
-    //   if (!selectedMetric) {
-    //     const firstMetric = Object.keys(parsedToJSON)[0];
-    //     if (firstMetric) {
-    //       setSelectedMetric(firstMetric);
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error("Error fetching data:", error);
-    // } finally {
-    //   setLoading(false);
-    // }
-
     try {
-      const res = await axios.get("http://172.16.20.173/metrics");
-      
-      const parsedToJSON = parseMetrics(res.data);
+      // using hardcoded data for testing
+      const parsedToJSON = parseMetrics(hardCodedMetricData);
       setMetrics(parsedToJSON);
+      
+      // selecting metric when reloaded
       if (!selectedMetric) {
         const firstMetric = Object.keys(parsedToJSON)[0];
         if (firstMetric) {
           setSelectedMetric(firstMetric);
         }
       }
-      console.log("fetching data from metrics successful", parsedToJSON);
-      
-    } catch(error) {
-      console.error("error fetching data:", error);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
+
+    // try {
+    //   const res = await axios.get("http://172.16.20.173/metrics");
+      
+    //   const parsedToJSON = parseMetrics(res.data);
+    //   setMetrics(parsedToJSON);
+    //   if (!selectedMetric) {
+    //     const firstMetric = Object.keys(parsedToJSON)[0];
+    //     if (firstMetric) {
+    //       setSelectedMetric(firstMetric);
+    //     }
+    //   }
+    //   console.log("fetching data from metrics successful", parsedToJSON);
+      
+    // } catch(error) {
+    //   console.error("error fetching data:", error);
+    // } finally {
+    //   setLoading(false);
+    // }
   }
 
   useEffect(() => {
     fetchMetrics();
   }, []);
-
-    const distinctStatus = [...new Set(
-    Object.values(metrics).flatMap(metricArray =>
-      metricArray.flatMap(metric =>
-        Object.entries(metric.labels)
-          .filter(([key]) => key === "status")
-          .map(([, value]) => value)
-      )
-    )
-    )].filter(Boolean);
-
-    const distinctMethods = [...new Set(
-      Object.values(metrics).flatMap(metricArray =>
-        metricArray.flatMap(metric =>
-          Object.entries(metric.labels)
-            .filter(([key]) => key === "method")
-            .map(([, value]) => value)
-        )
-      )
-    )].filter(Boolean);
   
   function titleCase(str: string) {
     var splitStr = str.toLowerCase().split(' ');
@@ -836,31 +817,73 @@ export default function MetricsDashboard() {
     return metrics;
   }
 
+  // getting available labels for the selected metric
+  const getAvailableLabels = () => {
+    if (!selectedMetric || !metrics[selectedMetric]) {
+      return { hasStatus: false, hasMethod: false, statuses: [], methods: [] };
+    }
+
+    const statuses = [...new Set(
+      metrics[selectedMetric]
+        .map(metric => metric.labels.status)
+        .filter(Boolean)
+    )];
+
+    const methods = [...new Set(
+      metrics[selectedMetric]
+        .map(metric => metric.labels.method)
+        .filter(Boolean)
+    )];
+
+    return {
+      hasStatus: statuses.length > 0,
+      hasMethod: methods.length > 0,
+      statuses,
+      methods
+    };
+  };
+
+  const availableLabels = getAvailableLabels();
+
+  // filter the selected metric data based on status and method and searchinput
+  const getFilteredMetricData = (): MetricType[] => {
+  if (!selectedMetric || !metrics[selectedMetric]) {
+    return [];
+  }
+  return metrics[selectedMetric].filter(metric => {
+
+    if (selectedStatus && metric.labels.status !== selectedStatus) return false;
+    if (selectedMethod && metric.labels.method !== selectedMethod) return false;
+    if (searchInput) {
+      const hasMatchingLabel = Object.values(metric.labels).some(value =>
+        value.toLowerCase().includes(searchInput.toLowerCase())
+      );
+      if (!hasMatchingLabel) return false;
+    }
+    return true;
+  });
+};
+
+  const filteredMetricData = getFilteredMetricData();
+
   // function to generate label for a metric entry
   function getMetricLabel(metric: MetricType, metricName: string): string {
-
     const labels = Object.entries(metric.labels);
-    // .filter(([value]) => value.toLowerCase().includes(searchInput.toLowerCase()));
-  
     if (labels.length > 0) {
       return labels.map(([key, value]) => `${key}: ${value}`).join(" | ");
     }
-    
     return "Unlabeled";
   }
 
-  const filteredMetrics = Object.entries(metrics) //.filter(value => value.includes(selectedStatus) && value.includes(selectedMethod));
-
-  // bar Chart  
   function BarChart({ metricName, metricData }: { metricName: string; metricData: MetricType[] }) {
 
     const totalSum = metricData.reduce((sum, metric) => sum + metric.value, 0);
     const sortedData = [...metricData].sort((a, b) => b.value - a.value);
 
     return (
-      <div className="horizontal-bar-chart p-4">
+      <div className="horizontal-bar-chart p-4 scrollbar-dark" >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 bg-gray-700 rounded-md p-2">
             {metricName}
           </h3>
           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -894,27 +917,6 @@ export default function MetricsDashboard() {
             );
           })}
         </div>
-        
-        {/* Summary statistics */}
-        {/* <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <div className="text-center">
-              <div className="text-gray-600 dark:text-gray-400">Total Sum</div>
-              <div className="font-semibold text-gray-900 dark:text-gray-100">{totalSum.toLocaleString()}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-gray-600 dark:text-gray-400">Items Count</div>
-              <div className="font-semibold text-gray-900 dark:text-gray-100">{sortedData.length}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-gray-600 dark:text-gray-400">Average</div>
-              <div className="font-semibold text-gray-900 dark:text-gray-100">
-                {totalSum > 0 ? (totalSum / sortedData.length).toLocaleString(undefined, { maximumFractionDigits: 2 }) : 0}
-              </div>
-            </div>
-            
-          </div>
-        </div> */}
       </div>
     );
   }
@@ -934,25 +936,21 @@ export default function MetricsDashboard() {
           <div className="flex items-center gap-4">
 
             {/*Refresh Button*/}
-            <Tooltip title="Refresh Metrics">
-              <IconButton 
-                onClick={fetchMetrics} 
-                disabled={loading}
-                size="small"
-                sx={{ 
-                  color: "#e5e7eb",
-                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
-                }}
-              >
-                <RefreshIcon />
-              </IconButton>
-            </Tooltip>
+            <RefreshButton 
+              onRefresh={fetchMetrics} 
+              loading={loading}
+              tooltipTitle="Refresh Metrics Data"
+            />
 
             {/*Metric Selector*/}
             <select 
               value={selectedMetric}
-              onChange={(e) => setSelectedMetric(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => {
+                setSelectedMetric(e.target.value);
+                setSelectedStatus("");
+                setSelectedMethod("");
+              }}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
               <option value="">Select Metric...</option>
               {Object.keys(metrics).map(metricName => (
@@ -963,32 +961,37 @@ export default function MetricsDashboard() {
             </select>  
 
             {/*Status Selector*/}
-            <select 
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Status...</option>
-              {distinctStatus.map(status => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>      
+            {availableLabels.hasStatus && (
+              <select 
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value as StatusType)}
+  
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">All Statuses</option>
+                {availableLabels.statuses.map(status => (
+                  <option key={status} value={status}>
+                    {status.replaceAll("\"","")}
+                  </option>
+                ))}
+              </select>
+            )}
 
             {/*Method Selector*/}
-            <select 
-              value={selectedMethod}
-              onChange={(e) => setSelectedMethod(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Method...</option>
-              {distinctMethods.map(method => (
-                <option key={method} value={method}>
-                  {method}
-                </option>
-              ))}
-            </select>  
+            {availableLabels.hasMethod && (
+              <select 
+                value={selectedMethod}
+                onChange={(e) => setSelectedMethod(e.target.value as MethodType)}
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">All Methods</option>
+                {availableLabels.methods.map(method => (
+                  <option key={method} value={method}>
+                    {method.replaceAll("\"","")}
+                  </option>
+                ))}
+              </select>
+            )}  
 
           </div>
         </div>
@@ -999,14 +1002,25 @@ export default function MetricsDashboard() {
           </div>
         )}
 
-        {!loading && filteredMetrics.length > 0 && (
+        {!loading && Object.keys(metrics).length > 0 && (
           <>
-            {selectedMetric && metrics[selectedMetric] && (
+            {selectedMetric && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <BarChart 
-                  metricName={selectedMetric} 
-                  metricData={metrics[selectedMetric]} 
-                />
+                {filteredMetricData.length > 0 ? (
+                  <BarChart 
+                    metricName={selectedMetric} 
+                    metricData={filteredMetricData} 
+                  />
+                ) : (
+                  <div className="p-8 text-center">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      No data found
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No metrics match your current filters and search.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1023,18 +1037,7 @@ export default function MetricsDashboard() {
           </>
         )}
 
-        {!loading && filteredMetrics.length === 0 && searchInput && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              No metrics found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              No metrics match your search: "{searchInput}"
-            </p>
-          </div>
-        )}
-
-        {!loading && Object.keys(metrics).length === 0 && !searchInput && (
+        {!loading && Object.keys(metrics).length === 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
               No metrics data available
@@ -1049,15 +1052,8 @@ export default function MetricsDashboard() {
   );
 }
 
-
-
 // final json format:
 // {
-//   "python_gc_objects_collected_total": [
-//     { "labels": { "generation": "0" }, "value": 1332970 },
-//     { "labels": { "generation": "1" }, "value": 494797 },
-//     { "labels": { "generation": "2" }, "value": 940529 }
-//   ],
 //   "http_requests_total": [
 //     { "labels": { "handler": "/api/v1/datas/calc/{id}", "method": "GET", "status": "2xx" }, "value": 5033 },
 //     { "labels": { "handler": "/api/v1/datas/calc/{id}", "method": "GET", "status": "5xx" }, "value": 2 }

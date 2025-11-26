@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @theme {
@@ -14,4 +17,29 @@
 
 body, input, button, textarea, select {
   font-family: 'Vazirmatn';
+}
+
+@layer utilities {
+  .scrollbar-dark {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(75 85 99) rgb(31 41 55);
+  }
+  
+  .scrollbar-dark::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollbar-dark::-webkit-scrollbar-track {
+    background: rgb(31 41 55);
+    border-radius: 4px;
+  }
+  
+  .scrollbar-dark::-webkit-scrollbar-thumb {
+    background: rgb(75 85 99);
+    border-radius: 4px;
+  }
+  
+  .scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background: rgb(107 114 128);
+  }
 }

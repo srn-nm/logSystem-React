@@ -13,7 +13,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
 
   return (
     <nav
-      className="flex flex-col lg:flex-row items-start lg:items-center justify-between px-4 py-2 shadow-md transition-colors dark:bg-gray-800 dark:text-gray-200 bg-white text-gray-900"
+      className="sticky top-0 z-50 flex flex-col lg:flex-row items-start lg:items-center justify-between px-4 py-2 shadow-md transition-colors dark:bg-gray-800 dark:text-gray-200 bg-white text-gray-900"
       style={{ direction: "rtl" }}
     >
       <div className="flex items-center w-full lg:w-auto">
