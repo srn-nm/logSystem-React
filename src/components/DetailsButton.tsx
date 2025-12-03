@@ -12,7 +12,7 @@ export default function DetailsButton({ logID }: DetailsButtonProps) {
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 500);
     return () => clearTimeout(timeout);
   });
 

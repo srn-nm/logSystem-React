@@ -1,7 +1,6 @@
 import "../style.css";
 import { useNavigate } from "react-router-dom";
 import HomeFilledIcon from '@mui/icons-material/HomeFilled';
-import ErrorIcon from '@mui/icons-material/Error';
 
 export default function ErrorElement() {
   const navigate = useNavigate();

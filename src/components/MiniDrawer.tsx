@@ -10,6 +10,7 @@ import { styled, useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import TableChartIcon from '@mui/icons-material/TableChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import type { ClassNames } from "@emotion/react";
 
 const drawerWidth = 240;
 
@@ -53,7 +54,7 @@ const groups: DrawerGroup[] = [
     iconandName: (
       <>
         <TableChartIcon />
-        <div className="pl-2">Logs Table</div>
+        <div className="pl-2">Log Table</div>
       </>
     ),
   },
@@ -115,10 +116,14 @@ export default function MiniDrawer({ drawerOpen, setDrawerOpen }: DrawerOpenProp
         const hasItems = group.items.length > 0;
 
         return (
-          <Box key={group.groupName} className="mb-4 flex flex-col">
+          <Box  key={group.groupName} 
+                className={`mb-4 flex flex-col ${drawerOpen ? "" : "w-7"} `}
+                sx={{"&:hover": { backgroundColor: "rgba(201, 191, 191, 0.5)" }, borderRadius: 1, }}
+          >
             {hasItems ? (
               <Box
-                className="flex items-center justify-between cursor-pointer px-1 mb-1"
+                className={`flex items-center justify-between cursor-pointer px-1 mb-1 `}
+                
                 onClick={() => toggleGroup(group.groupName)}
               >
                 {drawerOpen ? (
@@ -143,14 +148,14 @@ export default function MiniDrawer({ drawerOpen, setDrawerOpen }: DrawerOpenProp
             ) : (
               <Button
                 onClick={() => group.path && navigate(group.path)}
-                className="p-0 text-left w-full text-gray-500 dark:text-gray-400 uppercase text-2xs"
+                className={`text-left text-gray-500 dark:text-gray-400 text-2xs w-full`}
                 sx={{
                   justifyContent: "flex-start",
-                  paddingLeft: "0px",
                   borderRadius: 2,
                   textTransform: "none",
                   fontSize: "1rem",
-                  "&:hover": { backgroundColor: "rgba(201, 191, 191, 0.5)" },
+                  padding: "5px",
+                  paddingLeft: "0px",
                   color: "#d8d1d1ff",
                 }}
               >

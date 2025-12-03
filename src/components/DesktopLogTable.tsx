@@ -12,161 +12,8 @@ interface Props {
   setPageSize: (s: number) => void;
 }
 
-// Mock data for demonstration
-const mockData: ColumnsList[] = [
-  {
-    id: 1,
-    api_key: "key_12345",
-    ip_address: "192.168.1.100",
-    path: "/api/v1/users",
-    method: "GET",
-    status_code: 200,
-    process_time: 150,
-    created_at: new Date("2024-01-15T10:30:00Z")
-  },
-  {
-    id: 2,
-    api_key: "key_67890",
-    ip_address: "192.168.1.101",
-    path: "/api/v1/auth/login",
-    method: "POST",
-    status_code: 201,
-    process_time: 250,
-    created_at: new Date("2024-01-15T10:32:00Z")
-  },
-  {
-    id: 3,
-    api_key: null,
-    ip_address: "192.168.1.102",
-    path: "/api/v1/products/123",
-    method: "GET",
-    status_code: 404,
-    process_time: 80,
-    created_at: new Date("2024-01-15T10:35:00Z")
-  },
-  {
-    id: 4,
-    api_key: "key_abcde",
-    ip_address: "192.168.1.103",
-    path: "/api/v1/orders",
-    method: "POST",
-    status_code: 400,
-    process_time: 120,
-    created_at: new Date("2024-01-15T10:40:00Z")
-  },
-  {
-    id: 5,
-    api_key: "key_fghij",
-    ip_address: "192.168.1.104",
-    path: "/api/v1/health",
-    method: "GET",
-    status_code: 200,
-    process_time: 15,
-    created_at: new Date("2024-01-15T10:45:00Z")
-  },
-  {
-    id: 1,
-    api_key: "key_12345",
-    ip_address: "192.168.1.100",
-    path: "/api/v1/users",
-    method: "GET",
-    status_code: 200,
-    process_time: 150,
-    created_at: new Date("2024-01-15T10:30:00Z")
-  },
-  {
-    id: 2,
-    api_key: "key_67890",
-    ip_address: "192.168.1.101",
-    path: "/api/v1/auth/login",
-    method: "POST",
-    status_code: 201,
-    process_time: 250,
-    created_at: new Date("2024-01-15T10:32:00Z")
-  },
-  {
-    id: 3,
-    api_key: null,
-    ip_address: "192.168.1.102",
-    path: "/api/v1/products/123",
-    method: "GET",
-    status_code: 404,
-    process_time: 80,
-    created_at: new Date("2024-01-15T10:35:00Z")
-  },
-  {
-    id: 4,
-    api_key: "key_abcde",
-    ip_address: "192.168.1.103",
-    path: "/api/v1/orders",
-    method: "POST",
-    status_code: 400,
-    process_time: 120,
-    created_at: new Date("2024-01-15T10:40:00Z")
-  },
-  {
-    id: 5,
-    api_key: "key_fghij",
-    ip_address: "192.168.1.104",
-    path: "/api/v1/health",
-    method: "GET",
-    status_code: 200,
-    process_time: 15,
-    created_at: new Date("2024-01-15T10:45:00Z")
-  },
-  {
-    id: 1,
-    api_key: "key_12345",
-    ip_address: "192.168.1.100",
-    path: "/api/v1/users",
-    method: "GET",
-    status_code: 200,
-    process_time: 150,
-    created_at: new Date("2024-01-15T10:30:00Z")
-  },
-  {
-    id: 2,
-    api_key: "key_67890",
-    ip_address: "192.168.1.101",
-    path: "/api/v1/auth/login",
-    method: "POST",
-    status_code: 201,
-    process_time: 250,
-    created_at: new Date("2024-01-15T10:32:00Z")
-  },
-  {
-    id: 3,
-    api_key: null,
-    ip_address: "192.168.1.102",
-    path: "/api/v1/products/123",
-    method: "GET",
-    status_code: 404,
-    process_time: 80,
-    created_at: new Date("2024-01-15T10:35:00Z")
-  },
-  {
-    id: 4,
-    api_key: "key_abcde",
-    ip_address: "192.168.1.103",
-    path: "/api/v1/orders",
-    method: "POST",
-    status_code: 400,
-    process_time: 120,
-    created_at: new Date("2024-01-15T10:40:00Z")
-  },
-  {
-    id: 5,
-    api_key: "key_fghij",
-    ip_address: "192.168.1.104",
-    path: "/api/v1/health",
-    method: "GET",
-    status_code: 200,
-    process_time: 15,
-    created_at: new Date("2024-01-15T10:45:00Z")
-  }
-];
 
-export default function DesktopDataGrid({ rows, loading, rowCount, page, pageSize, setPage, setPageSize }: Props) {
+export default function DesktopLogTable({ rows, loading, rowCount, page, pageSize, setPage, setPageSize }: Props) {
   const [filters, setFilters] = useState({
     method: "",
     status: "",
@@ -174,9 +21,8 @@ export default function DesktopDataGrid({ rows, loading, rowCount, page, pageSiz
     ip: ""
   });
 
-  const dataToUse =  mockData  //rows;
+  const dataToUse =  rows;
 
-  // Filtered rows based on filters
   const filteredRows = useMemo(() => {
     return dataToUse.filter(row => {
       return (
@@ -188,7 +34,8 @@ export default function DesktopDataGrid({ rows, loading, rowCount, page, pageSiz
     });
   }, [dataToUse, filters]);
 
-  // paginated data
+  console.log("length: " + filteredRows.length)
+
   const paginatedRows = useMemo(() => {
     const startIndex = page * pageSize;
     return filteredRows.slice(startIndex, startIndex + pageSize);
@@ -226,17 +73,16 @@ export default function DesktopDataGrid({ rows, loading, rowCount, page, pageSiz
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="animate-pulse space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex space-x-4">
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-165">
+               
+          <div className="p-8 text-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              <div className="flex items-center justify-center h-150">
+                <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
-            </div>
-          ))}
-        </div>
+            </h3>
+          </div>
+
       </div>
     );
   }
@@ -334,12 +180,12 @@ export default function DesktopDataGrid({ rows, loading, rowCount, page, pageSiz
                     {row.path}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMethodColor(row.method)}`}>
+                    <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-medium ${getMethodColor(row.method)}`}>
                       {row.method}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(row.status_code)}`}>
+                    <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-medium ${getStatusColor(row.status_code)}`}>
                       {row.status_code}
                     </span>
                   </td>
@@ -408,5 +254,4 @@ export default function DesktopDataGrid({ rows, loading, rowCount, page, pageSiz
     </div>
     </>
   );
-
 }
