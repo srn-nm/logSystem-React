@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import type { ColumnsList } from "./LogTable";
+import type { ColumnsList } from "./ColumnsList";
 import DetailsButton from "./DetailsButton";
+import DesktopLogPagination from "./DesktopLogPagination";
 
 interface Props {
   rows: ColumnsList[];
@@ -12,6 +13,7 @@ interface Props {
   setPageSize: (s: number) => void;
 }
 
+const DesktopLogTableHeaders: string[] = ["ID", "IP Address", "Path", "Method", "Status", "Process Time", "Created At", "Details"];
 
 export default function DesktopLogTable({ rows, loading, rowCount, page, pageSize, setPage, setPageSize }: Props) {
   const [filters, setFilters] = useState({
@@ -154,20 +156,15 @@ export default function DesktopLogTable({ rows, loading, rowCount, page, pageSiz
       </div>
 
       {/* Table */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">IP Address</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Path</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Method</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Process Time</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created At</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Details</th>
+            <tr> 
+              {DesktopLogTableHeaders.map(header => 
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{header}</th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -211,45 +208,7 @@ export default function DesktopLogTable({ rows, loading, rowCount, page, pageSiz
 
       {/* Pagination */}
       {filteredRows.length > 0 && (
-        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
-              Showing {paginatedRows.length} of {filteredRows.length} logs
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage(page - 1)}
-                disabled={page === 0}
-                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors"
-              >
-                Previous
-              </button>
-              
-              <span className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300">
-                Page {page + 1} of {Math.ceil(filteredRows.length / pageSize)}
-              </span>
-              
-              <button
-                onClick={() => setPage(page + 1)}
-                disabled={page >= Math.ceil(filteredRows.length / pageSize) - 1}
-                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors"
-              >
-                Next
-              </button>
-              
-              <select
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value={10}>10 per page</option>
-                <option value={25}>25 per page</option>
-                <option value={50}>50 per page</option>
-                <option value={100}>100 per page</option>
-              </select>
-            </div>
-          </div>
-        </div>
+        <DesktopLogPagination paginatedRows={paginatedRows} filteredRows={filteredRows} page={page} setPage={setPage} pageSize={pageSize} setPageSize={setPageSize}></DesktopLogPagination>
       )}
     </div>
     </>

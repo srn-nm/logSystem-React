@@ -1,23 +1,8 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import DataContext from "../contexts/dataContext";
-import DesktopLogTable from "./DesktopLogTable.tsx";
-import MobileLogTable from "./MobileLogTable.tsx";
-import { RefreshButton } from "./RefreshButton";
-
-export interface ColumnsList {
-  id: number | null;
-  api_key: string | null;
-  ip_address: string;
-  path: string;
-  method: string;
-  status_code: number;
-  request_body?: Record<string, any> | any[] | null;
-  response_body?: Record<string, any> | any[] | null;
-  query_params?: Record<string, any> | null;
-  path_params?: Record<string, any> | null;
-  process_time: number;
-  created_at: Date;
-}
+import LogTableHeader from "./LogTableHeader.tsx";
+import LogTableBody from "./LogTableBody.tsx";
+import type { ColumnsList } from "./ColumnsList.tsx";
 
 export default function logTable() {
   const context = useContext(DataContext);
@@ -107,58 +92,25 @@ export default function logTable() {
     setLoading(false);
   };
 
+  const callFetchTableData = useCallback(() => fetchTableData, []);
+
   useEffect(() => {
     fetchTableData();
   }, [page, pageSize, searchInput]);
 
   return (
     <>
-      <div className="flex items-center justify-center p-4 pb-0 m-0">
-
-          <div className="">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-200 ml-1">
-              Log Table
-            </h1>
-          </div>
-
-          <div className="pl-4">
-            <RefreshButton 
-              onRefresh={fetchTableData} 
-              loading={loading}
-              tooltipTitle="Refresh Table Data"
-            />
-          </div>
-
-      </div>
-
-      <div className="w-full bg-gray-100 dark:bg-gray-900 transition-colors p-4">
-        
-        {/*Desktop*/}
-        <div className="hidden lg:block">
-          <DesktopLogTable
-            rows={rows}
-            loading={loading}
-            rowCount={rowCount}
-            page={page}
-            pageSize={pageSize}
-            setPage={setPage}
-            setPageSize={setPageSize}
-          />
-        </div>
-
-        {/*Mobile*/}
-        <div className="lg:hidden">
-          <MobileLogTable
-            rows={rows}
-            loading={loading}
-            rowCount={rowCount}
-            page={page}
-            pageSize={pageSize}
-            setPage={setPage}
-            setPageSize={setPageSize}
-          />
-        </div>
-      </div>
+      <LogTableHeader callFetchTableData={callFetchTableData} loading={loading}></LogTableHeader>
+      <LogTableBody 
+        rows={rows}
+        loading={loading}
+        rowCount={rowCount}
+        page={page}
+        pageSize={pageSize}
+        setPage={setPage}
+        setPageSize={setPageSize}
+      >
+      </LogTableBody>
     </>
   );
 }

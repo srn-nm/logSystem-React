@@ -2,9 +2,7 @@ import { motion } from "framer-motion";
 import LoginForms from "../components/LoginForms";
 import { GlobalStyles } from '@mui/material';
 
-
 export default function LoginPage() {
-
   return (
     <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors rtl" style={{direction:"rtl"}}>
       <motion.div
@@ -14,13 +12,12 @@ export default function LoginPage() {
         className="bg-white/90 dark:bg-gray-800 p-10 rounded-2xl max-w-md w-full shadow-lg transition-colors"
       >
         <GlobalStyles
-        styles={{
-          'input[type="password"]::-ms-reveal': {
-            filter: 'invert(100%)',
-          },
-        }}
+          styles={{
+            'input[type="password"]::-ms-reveal': {
+              filter: 'invert(100%)',
+            },
+          }}
         />
-
         <LoginForms></LoginForms>
       </motion.div>
     </div>
