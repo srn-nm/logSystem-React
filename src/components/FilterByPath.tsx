@@ -1,8 +1,8 @@
-import type { DesktopFilters } from "./LogTableDesktop";
+import type { Filters } from "./LogBody";
 
 interface Props {
-  filters: DesktopFilters;
-  handleFilterChange: (key: keyof DesktopFilters, value: string) => void;
+  filters: Filters;
+  handleFilterChange: (key: keyof Filters, value: string) => void;
 }
 
 export default function FilterByPath({filters, handleFilterChange}: Props) {

@@ -3,6 +3,7 @@ import DataContext from "../contexts/dataContext";
 import axios from "axios";
 import { RefreshButton } from "./RefreshButton";
 import BarChart from "./MetricsBarChart";
+import LoadingTable from "./LoadingTable";
 
 interface MetricType {
   labels: Record<string, string>;
@@ -940,15 +941,7 @@ http_request_duration_seconds_created{handler="/api/v1/reports/{id}",method="DEL
         </div>
 
         {loading && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-165">
-              <div className="p-8 text-center">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  <div className="flex items-center justify-center h-150">
-                    <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-                  </div>
-                </h3>
-              </div>
-          </div>
+          <LoadingTable/>
         )}
 
         {!loading && Object.keys(metrics).length > 0 && (
