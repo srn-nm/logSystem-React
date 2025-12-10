@@ -28,7 +28,6 @@ export default function LoginStep({ authForm, setAuthForm, goToOtp }: Props) {
 
       const challengeID = JSON.stringify(res.data);
       localStorage.setItem("ID", challengeID);
-
       await sendSMS(challengeID);
       goToOtp();
     } catch (err) {

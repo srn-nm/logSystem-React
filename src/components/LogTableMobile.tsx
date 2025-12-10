@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import type { ColumnsList } from "./LogTable";
 import DetailsButton from "./DetailsButton";
+import type { ColumnsList } from "./ColumnsList";
 
 interface Props {
   rows: ColumnsList[];
@@ -13,7 +13,7 @@ interface Props {
 }
 
 
-export default function MobileLogTable({ rows, loading, rowCount, page, pageSize, setPage, setPageSize }: Props) {
+export default function LogTableMobile({ rows, loading, rowCount, page, pageSize, setPage, setPageSize }: Props) {
   const [filters, setFilters] = useState({
     status: "",
     ip: ""

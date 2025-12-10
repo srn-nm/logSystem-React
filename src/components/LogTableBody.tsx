@@ -1,6 +1,8 @@
-import DesktopLogTable from "./DesktopLogTable";
-import MobileLogTable from "./MobileLogTable";
+import { lazy } from "react";
 import type { ColumnsList } from "./ColumnsList";
+
+const DesktopLogTable = lazy(() => import('./LogTableDesktop'));
+const MobileLogTable = lazy(() => import('./LogTableMobile'));
 
 interface LogTableBodyProps {
   rows: ColumnsList[];

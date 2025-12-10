@@ -4,6 +4,7 @@ import { GlobalStyles } from '@mui/material';
 
 export default function LoginPage() {
   return (
+
     <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors rtl" style={{direction:"rtl"}}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -21,5 +22,6 @@ export default function LoginPage() {
         <LoginForms></LoginForms>
       </motion.div>
     </div>
+    
   );
 }

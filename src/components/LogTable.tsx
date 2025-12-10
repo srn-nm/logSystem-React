@@ -10,10 +10,10 @@ export default function logTable() {
   const { searchInput } = context;
 
   const [rows, setRows] = useState<ColumnsList[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [rowCount, setRowCount] = useState(0);
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [rowCount, setRowCount] = useState<number>(0);
+  const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
 
   const mockData: ColumnsList[] = [
     {
