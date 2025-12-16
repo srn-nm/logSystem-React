@@ -1,16 +1,11 @@
 import React, { useState } from "react";
-import { IconButton, Button, Box, Drawer, Typography} from "@mui/material";
-import SwipeableDrawer from "@mui/material/SwipeableDrawer";
+import { useNavigate } from "react-router-dom";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CloseIcon from "@mui/icons-material/Close";
 import LogoutIcon from "@mui/icons-material/LogoutOutlined";
-import { useNavigate } from "react-router-dom";
-import { styled, useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import TableChartIcon from '@mui/icons-material/TableChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import type { ClassNames } from "@emotion/react";
 
 const drawerWidth = 240;
 
@@ -33,16 +28,16 @@ interface DrawerGroup {
   iconandName: React.ReactNode;
 }
 
-const groups: DrawerGroup[] = [
+const drawerGroups: DrawerGroup[] = [
   {
     groupName: "Dashboard",
     items: [],
     path: "/Dashboard",
-    icon: <BarChartIcon />,
+    icon: <BarChartIcon className="text-gray-700 dark:text-gray-200" />,
     iconandName: (
       <>
-        <BarChartIcon />
-        <div className="pl-2">Dashboard</div>
+        <BarChartIcon className="text-gray-700 dark:text-gray-200" />
+        <div className="pl-2 text-gray-700 dark:text-gray-200">Dashboard</div>
       </>
     ),
   },
@@ -50,11 +45,11 @@ const groups: DrawerGroup[] = [
     groupName: "Logs",
     items: [],
     path: "/Logs",
-    icon: <TableChartIcon />,
+    icon: <TableChartIcon className="text-gray-700 dark:text-gray-200" />,
     iconandName: (
       <>
-        <TableChartIcon />
-        <div className="pl-2">Log Table</div>
+        <TableChartIcon className="text-gray-700 dark:text-gray-200" />
+        <div className="pl-2 text-gray-700 dark:text-gray-200">Log Table</div>
       </>
     ),
   },
@@ -62,163 +57,152 @@ const groups: DrawerGroup[] = [
     groupName: "Logout",
     items: [],
     path: "/Login",
-    icon: <LogoutIcon />,
+    icon: <LogoutIcon className="text-gray-700 dark:text-gray-200" />,
     iconandName: (
       <>
-        <LogoutIcon />
-        <div className="pl-2">Logout</div>
+        <LogoutIcon className="text-gray-700 dark:text-gray-200" />
+        <div className="pl-2 text-gray-700 dark:text-gray-200">Logout</div>
       </>
     ),
   },
-  
 ];
-
-const PermanentDrawer = styled(Drawer)(({ theme }) => ({
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-  boxSizing: "border-box",
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.standard,
-  }),
-  "& .MuiDrawer-paper": {
-    whiteSpace: "nowrap",
-    boxSizing: "border-box",
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.standard,
-    }),
-  },
-}));
 
 export default function MiniDrawer({ drawerOpen, setDrawerOpen }: DrawerOpenProps) {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isSmDown = useMediaQuery(theme.breakpoints.down("sm"));
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const [isMobile, setIsMobile] = useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const toggleGroup = (groupName: string) => {
     setOpenGroups((prev) => ({ ...prev, [groupName]: !prev[groupName] }));
   };
 
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    if (isMobile) {
+      setDrawerOpen(false);
+    }
+  };
+
   const DrawerContent = (
-    <Box className="flex flex-col h-full p-4 bg-white dark:bg-gray-800 transition-colors">
-      {isSmDown && (
-        <Box className="flex justify-end mb-4">
-          <IconButton onClick={() => setDrawerOpen(false)}>
+    <div className="flex flex-col h-full p-4 bg-white dark:bg-gray-800 transition-colors">
+      {isMobile && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setDrawerOpen(false)}
+            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
             <CloseIcon className="text-gray-700 dark:text-gray-200" />
-          </IconButton>
-        </Box>
+          </button>
+        </div>
       )}
 
-      {groups.map((group) => {
+      {drawerGroups.map((group) => {
         const isOpen = openGroups[group.groupName] ?? true;
         const hasItems = group.items.length > 0;
 
         return (
-          <Box  key={group.groupName} 
-                className={`mb-4 flex flex-col ${drawerOpen ? "" : "w-7"} `}
-                sx={{"&:hover": { backgroundColor: "rgba(201, 191, 191, 0.5)" }, borderRadius: 1, }}
+          <div
+            key={group.groupName}
+            className={`mb-4 flex flex-col ${drawerOpen ? "" : "w-7"} hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors`}
           >
             {hasItems ? (
-              <Box
-                className={`flex items-center justify-between cursor-pointer px-1 mb-1 `}
-                
+              <div
+                className={`flex items-center justify-between cursor-pointer px-1 mb-1 py-1 rounded`}
                 onClick={() => toggleGroup(group.groupName)}
               >
                 {drawerOpen ? (
-                  <Typography
-                    variant="subtitle2"
-                    className="text-gray-500 dark:text-gray-400 uppercase text-xs"
-                    sx={{ fontSize: "1.1rem" }}
-                  >
+                  <span className="text-gray-500 dark:text-gray-400 uppercase text-xs text-sm font-medium">
                     {group.groupName}
-                  </Typography>
+                  </span>
                 ) : (
-                  <Box className="flex items-center justify-center w-full text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center justify-center w-full text-gray-500 dark:text-gray-400">
                     {group.icon}
-                  </Box>
+                  </div>
                 )}
                 {drawerOpen && (
-                  <IconButton size="small">
-                    {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  </IconButton>
+                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+                    {isOpen ? 
+                      <ExpandLessIcon className="text-gray-500 dark:text-gray-400" /> : 
+                      <ExpandMoreIcon className="text-gray-500 dark:text-gray-400" />
+                    }
+                  </button>
                 )}
-              </Box>
+              </div>
             ) : (
-              <Button
-                onClick={() => group.path && navigate(group.path)}
-                className={`text-left text-gray-500 dark:text-gray-400 text-2xs w-full`}
-                sx={{
-                  justifyContent: "flex-start",
-                  borderRadius: 2,
-                  textTransform: "none",
-                  fontSize: "1rem",
-                  padding: "5px",
-                  paddingLeft: "0px",
-                  color: "#d8d1d1ff",
-                }}
+              <button
+                onClick={() => group.path && handleNavigation(group.path)}
+                className={`text-left w-full p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center ${
+                  drawerOpen ? "justify-start" : "justify-center"
+                }`}
               >
                 {drawerOpen ? group.iconandName : group.icon}
-              </Button>
+              </button>
             )}
 
-            {hasItems &&
-              isOpen &&
-              group.items.map((item) => (
-                <Button
-                  key={item.id}
-                  onClick={() => navigate(item.path)}
-                  className="mb-2 text-left w-full"
-                  sx={{
-                    justifyContent: "flex-start",
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontSize: "1.125rem",
-                    "&:hover": { backgroundColor: "rgba(201, 191, 191, 0.5)" },
-                  }}
-                >
-                  {drawerOpen ? item.label : ""}
-                </Button>
-              ))}
-          </Box>
+            {hasItems && isOpen && drawerOpen && (
+              <div className="ml-2">
+                {group.items.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleNavigation(item.path)}
+                    className="w-full text-left p-2 mb-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-200"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         );
       })}
-    </Box>
+    </div>
   );
 
   return (
-    <Box>
-      {isSmDown ? (
-        <SwipeableDrawer
-          anchor="right"
-          open={drawerOpen}
-          onOpen={() => setDrawerOpen(true)}
-          onClose={() => setDrawerOpen(false)}
-          ModalProps={{ keepMounted: true }}
-          sx={{ "& .MuiDrawer-paper": { width: "100vw", transition: "none" } }}
+    <div>
+      {isMobile ? (
+        <div
+          className={`fixed inset-0 z-50 transition-all duration-300 ${
+            drawerOpen ? "visible" : "invisible"
+          }`}
+          style={{
+            backgroundColor: drawerOpen ? "rgba(0, 0, 0, 0.5)" : "transparent",
+          }}
+          onClick={() => setDrawerOpen(false)}
         >
-          {DrawerContent}
-        </SwipeableDrawer>
+          <div
+            className={`absolute right-0 top-0 h-full bg-white dark:bg-gray-800 shadow-lg transition-transform duration-300 ${
+              drawerOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+            style={{ width: "85vw" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {DrawerContent}
+          </div>
+        </div>
       ) : (
-        <PermanentDrawer
-          anchor="right"
-          variant="permanent"
-          open={drawerOpen}
-          sx={{
-            width: drawerOpen ? drawerWidth : 55,
-            "& .MuiDrawer-paper": {
-              width: drawerOpen ? drawerWidth : 55,
-              boxShadow: "-4px 0 10px rgba(0,0,0,0.5)",
-              borderLeft: "1px solid black",
-              overflowY: drawerOpen ? "auto" : "hidden", 
-              overflowX: "hidden", 
-            },
+
+        <div
+          className={`fixed right-0 top-0 h-full bg-white dark:bg-gray-800 border-l border-gray-300 dark:border-gray-700 shadow-lg transition-all duration-300 ${
+            drawerOpen ? "overflow-y-auto overflow-x-hidden" : "overflow-hidden"
+          }`}
+          style={{
+            width: drawerOpen ? `${drawerWidth}px` : "55px",
+            transition: "width 0.3s ease",
           }}
         >
           {DrawerContent}
-        </PermanentDrawer>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }

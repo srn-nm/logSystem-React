@@ -24,7 +24,7 @@ export default function LogTableDesktopFilters ({filters, setFilters, setPage}: 
       <div className="pb-7 border-b border-gray-200 dark:border-gray-700">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex flex-wrap gap-2">
-            {/* Clear Filters */}
+
             {(filters.method || filters.status || filters.path || filters.ip) && (
               <button
                 onClick={clearFilters}
@@ -36,7 +36,6 @@ export default function LogTableDesktopFilters ({filters, setFilters, setPage}: 
           </div>
         </div>
 
-        {/* Filter Inputs */}
 
         {/*Desktop*/}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 hidden lg:grid">

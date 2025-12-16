@@ -1,30 +1,24 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo, useCallback } from "react";
 import DataContext from "../contexts/dataContext";
-import axios from "axios";
-import { RefreshButton } from "./RefreshButton";
 import BarChart from "./MetricsBarChart";
 import LoadingTable from "./LoadingTable";
+import NoMetricSelected from "./NoMetricSelected";
+import NoDataAvailable from "./NoDataAvailable";
+import NoFilteredDataFound from "./NoFilteredDataFound";
+import MetricsHeader from "./MetricsHeader";
+import { parseMetrics } from "../utils/metricParser"
 
 interface MetricType {
   labels: Record<string, string>;
   value: number;
 }
 
+export type MethodType = "" | "OPTIONS" | "GET" | "POST" | "PATCH" | "PUT" | "DELETE"; 
+export type StatusType = "" | "2xx" | "3xx" | "4xx" | "5xx"; 
+
 type Metrics = Record<string, MetricType[]>;
 
-export default function MetricsDashboard() {
-  const context = useContext(DataContext);
-  const searchInput = context?.searchInput || "";
-  type StatusType = "" | "2xx" | "3xx" | "4xx" | "5xx"; 
-  type MethodType = "" | "OPTIONS" | "GET" | "POST" | "PATCH" | "PUT" | "DELETE"; 
-
-  const [metrics, setMetrics] = useState<Metrics>({});
-  const [loading, setLoading] = useState(false);
-  const [selectedMetric, setSelectedMetric] = useState<string>("");
-  const [selectedStatus, setSelectedStatus] = useState<StatusType>("");
-  const [selectedMethod, setSelectedMethod] = useState<MethodType>("");
-
-  const hardCodedMetricData = `# HELP python_gc_objects_collected_total Objects collected during gc
+const HARD_CODED_METRIC_DATA = `# HELP python_gc_objects_collected_total Objects collected during gc
 # TYPE python_gc_objects_collected_total counter
 python_gc_objects_collected_total{generation="0"} 1.33297e+06
 python_gc_objects_collected_total{generation="1"} 494797.0
@@ -379,339 +373,6 @@ http_response_size_bytes_created{handler="/api/v1/datas/datum/{id}"} 1.761634929
 http_response_size_bytes_created{handler="/api/v1/types/currencies"} 1.761652089339669e+09
 http_response_size_bytes_created{handler="/api/v1/types/{base_type}"} 1.761652089339669e+09
 http_response_size_bytes_created{handler="/api/v1/authentication/login/challenge"} 1.7617156153018217e+09
-http_response_size_bytes_created{handler="/api/v1/authentication/login/challenge/{id}/totp"} 1.7617156255361042e+09
-http_response_size_bytes_created{handler="/api/v1/authentication/login/challenge/{id}/totp/verify"} 1.7617156655990703e+09
-http_response_size_bytes_created{handler="/api/v1/authentication/login/access-token"} 1.7617156694839323e+09
-http_response_size_bytes_created{handler="/api/v1/authentication/login/challenge/{id}/mobile"} 1.761729395989651e+09
-http_response_size_bytes_created{handler="/api/v1/authentication/login/challenge/{id}/mobile/verify"} 1.7617294100371432e+09
-http_response_size_bytes_created{handler="/api/v1/reports"} 1.7617295022666554e+09
-http_response_size_bytes_created{handler="/api/v1/reports/{id}"} 1.7617295081345518e+09
-http_response_size_bytes_created{handler="/api/v1/schemas/list"} 1.7617295081345518e+09
-http_response_size_bytes_created{handler="/api/v1/render-report/{schema_id}"} 1.7617295125383465e+09
-http_response_size_bytes_created{handler="/metrics"} 1.7619987555055056e+09
-http_response_size_bytes_created{handler="/api/v1/"} 1.761998797374084e+09
-http_response_size_bytes_created{handler="/api/v1/health"} 1.761998801947058e+09
-http_response_size_bytes_created{handler="/api/v1/ping"} 1.7619988123991427e+09
-http_response_size_bytes_created{handler="/api/v1/datas/schema/{id}/calc"} 1.7621599567940352e+09
-http_response_size_bytes_created{handler="/api/v1/schemas/{id}/ref_keys"} 1.7622351758737595e+09
-http_response_size_bytes_created{handler="/api/v1/schemas/{id}/all_keys"} 1.762235301726929e+09
-http_response_size_bytes_created{handler="/api/v1/schemas/"} 1.762668464381682e+09
-# HELP http_request_duration_highr_seconds Latency with many buckets but no API specific labels. Made for more accurate percentile calculations. 
-# TYPE http_request_duration_highr_seconds histogram
-http_request_duration_highr_seconds_bucket{le="0.01"} 4115.0
-http_request_duration_highr_seconds_bucket{le="0.025"} 4705.0
-http_request_duration_highr_seconds_bucket{le="0.05"} 4745.0
-http_request_duration_highr_seconds_bucket{le="0.075"} 4765.0
-http_request_duration_highr_seconds_bucket{le="0.1"} 5074.0
-http_request_duration_highr_seconds_bucket{le="0.25"} 7712.0
-http_request_duration_highr_seconds_bucket{le="0.5"} 8602.0
-http_request_duration_highr_seconds_bucket{le="0.75"} 9011.0
-http_request_duration_highr_seconds_bucket{le="1.0"} 9238.0
-http_request_duration_highr_seconds_bucket{le="1.5"} 9518.0
-http_request_duration_highr_seconds_bucket{le="2.0"} 9855.0
-http_request_duration_highr_seconds_bucket{le="2.5"} 10229.0
-http_request_duration_highr_seconds_bucket{le="3.0"} 10649.0
-http_request_duration_highr_seconds_bucket{le="3.5"} 10945.0
-http_request_duration_highr_seconds_bucket{le="4.0"} 11225.0
-http_request_duration_highr_seconds_bucket{le="4.5"} 11470.0
-http_request_duration_highr_seconds_bucket{le="5.0"} 11858.0
-http_request_duration_highr_seconds_bucket{le="7.5"} 12681.0
-http_request_duration_highr_seconds_bucket{le="10.0"} 13257.0
-http_request_duration_highr_seconds_bucket{le="30.0"} 14674.0
-http_request_duration_highr_seconds_bucket{le="60.0"} 14677.0
-http_request_duration_highr_seconds_bucket{le="+Inf"} 14677.0
-http_request_duration_highr_seconds_count 14677.0
-http_request_duration_highr_seconds_sum 38054.054275706876
-# HELP http_request_duration_highr_seconds_created Latency with many buckets but no API specific labels. Made for more accurate percentile calculations. 
-# TYPE http_request_duration_highr_seconds_created gauge
-http_request_duration_highr_seconds_created 1.7615706614910269e+09
-# HELP http_request_duration_seconds Latency with only few buckets by handler. Made to be only used if aggregation by handler is important. 
-# TYPE http_request_duration_seconds histogram
-http_request_duration_seconds_bucket{handler="none",le="0.1",method="OPTIONS"} 3038.0
-http_request_duration_seconds_bucket{handler="none",le="0.5",method="OPTIONS"} 3044.0
-http_request_duration_seconds_bucket{handler="none",le="1.0",method="OPTIONS"} 3044.0
-http_request_duration_seconds_bucket{handler="none",le="+Inf",method="OPTIONS"} 3044.0
-http_request_duration_seconds_count{handler="none",method="OPTIONS"} 3044.0
-http_request_duration_seconds_sum{handler="none",method="OPTIONS"} 18.357255610870197
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/users/me",le="0.1",method="GET"} 111.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/users/me",le="0.5",method="GET"} 317.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/users/me",le="1.0",method="GET"} 321.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/users/me",le="+Inf",method="GET"} 334.0
-http_request_duration_seconds_count{handler="/api/v1/authentication/login/users/me",method="GET"} 334.0
-http_request_duration_seconds_sum{handler="/api/v1/authentication/login/users/me",method="GET"} 158.43151080259122
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard/{app}",le="0.1",method="GET"} 33.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard/{app}",le="0.5",method="GET"} 326.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard/{app}",le="1.0",method="GET"} 329.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard/{app}",le="+Inf",method="GET"} 336.0
-http_request_duration_seconds_count{handler="/api/v1/dashboard/{app}",method="GET"} 336.0
-http_request_duration_seconds_sum{handler="/api/v1/dashboard/{app}",method="GET"} 65.15500349667855
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}",le="0.1",method="GET"} 55.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}",le="0.5",method="GET"} 729.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}",le="1.0",method="GET"} 796.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}",le="+Inf",method="GET"} 885.0
-http_request_duration_seconds_count{handler="/api/v1/schemas/{id}",method="GET"} 885.0
-http_request_duration_seconds_sum{handler="/api/v1/schemas/{id}",method="GET"} 668.5780531924684
-http_request_duration_seconds_bucket{handler="/api/v1/reports/schema/{id}",le="0.1",method="GET"} 3.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/schema/{id}",le="0.5",method="GET"} 134.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/schema/{id}",le="1.0",method="GET"} 147.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/schema/{id}",le="+Inf",method="GET"} 152.0
-http_request_duration_seconds_count{handler="/api/v1/reports/schema/{id}",method="GET"} 152.0
-http_request_duration_seconds_sum{handler="/api/v1/reports/schema/{id}",method="GET"} 66.70350640383549
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}",le="0.1",method="GET"} 6.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}",le="0.5",method="GET"} 294.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}",le="1.0",method="GET"} 393.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}",le="+Inf",method="GET"} 581.0
-http_request_duration_seconds_count{handler="/api/v1/datas/schema/{id}",method="GET"} 581.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/schema/{id}",method="GET"} 825.3289549013134
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/list",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/list",le="0.5",method="GET"} 528.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/list",le="1.0",method="GET"} 653.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/list",le="+Inf",method="GET"} 728.0
-http_request_duration_seconds_count{handler="/api/v1/datas/schema/{id}/list",method="GET"} 728.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/schema/{id}/list",method="GET"} 348.0598121974617
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/ids",le="0.1",method="GET"} 27.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/ids",le="0.5",method="GET"} 1036.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/ids",le="1.0",method="GET"} 1119.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/ids",le="+Inf",method="GET"} 1138.0
-http_request_duration_seconds_count{handler="/api/v1/datas/schema/{id}/ids",method="GET"} 1138.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/schema/{id}/ids",method="GET"} 282.32195689855143
-http_request_duration_seconds_bucket{handler="/api/v1/export_pdf/{report_id}",le="0.1",method="POST"} 4.0
-http_request_duration_seconds_bucket{handler="/api/v1/export_pdf/{report_id}",le="0.5",method="POST"} 4.0
-http_request_duration_seconds_bucket{handler="/api/v1/export_pdf/{report_id}",le="1.0",method="POST"} 11.0
-http_request_duration_seconds_bucket{handler="/api/v1/export_pdf/{report_id}",le="+Inf",method="POST"} 31.0
-http_request_duration_seconds_count{handler="/api/v1/export_pdf/{report_id}",method="POST"} 31.0
-http_request_duration_seconds_sum{handler="/api/v1/export_pdf/{report_id}",method="POST"} 36.31063939910382
-http_request_duration_seconds_bucket{handler="/api/v1/datas/{id}",le="0.1",method="GET"} 71.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/{id}",le="0.5",method="GET"} 142.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/{id}",le="1.0",method="GET"} 143.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/{id}",le="+Inf",method="GET"} 144.0
-http_request_duration_seconds_count{handler="/api/v1/datas/{id}",method="GET"} 144.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/{id}",method="GET"} 19.399003299418837
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard",le="0.1",method="GET"} 80.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard",le="0.5",method="GET"} 80.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard",le="1.0",method="GET"} 80.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard",le="+Inf",method="GET"} 80.0
-http_request_duration_seconds_count{handler="/api/v1/dashboard",method="GET"} 80.0
-http_request_duration_seconds_sum{handler="/api/v1/dashboard",method="GET"} 0.12069129734300077
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard/",le="0.1",method="GET"} 28.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard/",le="0.5",method="GET"} 77.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard/",le="1.0",method="GET"} 77.0
-http_request_duration_seconds_bucket{handler="/api/v1/dashboard/",le="+Inf",method="GET"} 81.0
-http_request_duration_seconds_count{handler="/api/v1/dashboard/",method="GET"} 81.0
-http_request_duration_seconds_sum{handler="/api/v1/dashboard/",method="GET"} 53.3758850004524
-http_request_duration_seconds_bucket{handler="/docs",le="0.1",method="GET"} 21.0
-http_request_duration_seconds_bucket{handler="/docs",le="0.5",method="GET"} 21.0
-http_request_duration_seconds_bucket{handler="/docs",le="1.0",method="GET"} 21.0
-http_request_duration_seconds_bucket{handler="/docs",le="+Inf",method="GET"} 21.0
-http_request_duration_seconds_count{handler="/docs",method="GET"} 21.0
-http_request_duration_seconds_sum{handler="/docs",method="GET"} 0.021257100393995643
-http_request_duration_seconds_bucket{handler="/api/v1/openapi.json",le="0.1",method="GET"} 18.0
-http_request_duration_seconds_bucket{handler="/api/v1/openapi.json",le="0.5",method="GET"} 19.0
-http_request_duration_seconds_bucket{handler="/api/v1/openapi.json",le="1.0",method="GET"} 19.0
-http_request_duration_seconds_bucket{handler="/api/v1/openapi.json",le="+Inf",method="GET"} 19.0
-http_request_duration_seconds_count{handler="/api/v1/openapi.json",method="GET"} 19.0
-http_request_duration_seconds_sum{handler="/api/v1/openapi.json",method="GET"} 0.20380419958382845
-http_request_duration_seconds_bucket{handler="/api/v1/datas/calc/{id}",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/calc/{id}",le="0.5",method="GET"} 58.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/calc/{id}",le="1.0",method="GET"} 146.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/calc/{id}",le="+Inf",method="GET"} 5033.0
-http_request_duration_seconds_count{handler="/api/v1/datas/calc/{id}",method="GET"} 5033.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/calc/{id}",method="GET"} 34688.00846860348
-http_request_duration_seconds_bucket{handler="/api/v1/files/meta/{id}",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/files/meta/{id}",le="0.5",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/files/meta/{id}",le="1.0",method="GET"} 3.0
-http_request_duration_seconds_bucket{handler="/api/v1/files/meta/{id}",le="+Inf",method="GET"} 22.0
-http_request_duration_seconds_count{handler="/api/v1/files/meta/{id}",method="GET"} 22.0
-http_request_duration_seconds_sum{handler="/api/v1/files/meta/{id}",method="GET"} 61.756595900515094
-http_request_duration_seconds_bucket{handler="/api/v1/datas/datum/{id}",le="0.1",method="PATCH"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/datum/{id}",le="0.5",method="PATCH"} 17.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/datum/{id}",le="1.0",method="PATCH"} 17.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/datum/{id}",le="+Inf",method="PATCH"} 17.0
-http_request_duration_seconds_count{handler="/api/v1/datas/datum/{id}",method="PATCH"} 17.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/datum/{id}",method="PATCH"} 4.05313289957121
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}",le="0.1",method="POST"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}",le="0.5",method="POST"} 51.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}",le="1.0",method="POST"} 56.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}",le="+Inf",method="POST"} 57.0
-http_request_duration_seconds_count{handler="/api/v1/datas/schema/{id}",method="POST"} 57.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/schema/{id}",method="POST"} 18.475270399358124
-http_request_duration_seconds_bucket{handler="none",le="0.1",method="GET"} 10.0
-http_request_duration_seconds_bucket{handler="none",le="0.5",method="GET"} 10.0
-http_request_duration_seconds_bucket{handler="none",le="1.0",method="GET"} 10.0
-http_request_duration_seconds_bucket{handler="none",le="+Inf",method="GET"} 10.0
-http_request_duration_seconds_count{handler="none",method="GET"} 10.0
-http_request_duration_seconds_sum{handler="none",method="GET"} 0.02670620009303093
-http_request_duration_seconds_bucket{handler="/api/v1/types/currencies",le="0.1",method="GET"} 303.0
-http_request_duration_seconds_bucket{handler="/api/v1/types/currencies",le="0.5",method="GET"} 303.0
-http_request_duration_seconds_bucket{handler="/api/v1/types/currencies",le="1.0",method="GET"} 303.0
-http_request_duration_seconds_bucket{handler="/api/v1/types/currencies",le="+Inf",method="GET"} 303.0
-http_request_duration_seconds_count{handler="/api/v1/types/currencies",method="GET"} 303.0
-http_request_duration_seconds_sum{handler="/api/v1/types/currencies",method="GET"} 1.4759755008853972
-http_request_duration_seconds_bucket{handler="/api/v1/types/{base_type}",le="0.1",method="GET"} 1254.0
-http_request_duration_seconds_bucket{handler="/api/v1/types/{base_type}",le="0.5",method="GET"} 1254.0
-http_request_duration_seconds_bucket{handler="/api/v1/types/{base_type}",le="1.0",method="GET"} 1254.0
-http_request_duration_seconds_bucket{handler="/api/v1/types/{base_type}",le="+Inf",method="GET"} 1254.0
-http_request_duration_seconds_count{handler="/api/v1/types/{base_type}",method="GET"} 1254.0
-http_request_duration_seconds_sum{handler="/api/v1/types/{base_type}",method="GET"} 6.725766905816272
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge",le="0.1",method="POST"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge",le="0.5",method="POST"} 12.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge",le="1.0",method="POST"} 16.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge",le="+Inf",method="POST"} 33.0
-http_request_duration_seconds_count{handler="/api/v1/authentication/login/challenge",method="POST"} 33.0
-http_request_duration_seconds_sum{handler="/api/v1/authentication/login/challenge",method="POST"} 300.4773721995298
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/totp",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/totp",le="0.5",method="GET"} 3.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/totp",le="1.0",method="GET"} 3.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/totp",le="+Inf",method="GET"} 6.0
-http_request_duration_seconds_count{handler="/api/v1/authentication/login/challenge/{id}/totp",method="GET"} 6.0
-http_request_duration_seconds_sum{handler="/api/v1/authentication/login/challenge/{id}/totp",method="GET"} 8.962154100183398
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/totp/verify",le="0.1",method="POST"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/totp/verify",le="0.5",method="POST"} 7.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/totp/verify",le="1.0",method="POST"} 7.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/totp/verify",le="+Inf",method="POST"} 15.0
-http_request_duration_seconds_count{handler="/api/v1/authentication/login/challenge/{id}/totp/verify",method="POST"} 15.0
-http_request_duration_seconds_sum{handler="/api/v1/authentication/login/challenge/{id}/totp/verify",method="POST"} 20.964261600514874
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/access-token",le="0.1",method="POST"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/access-token",le="0.5",method="POST"} 16.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/access-token",le="1.0",method="POST"} 16.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/access-token",le="+Inf",method="POST"} 26.0
-http_request_duration_seconds_count{handler="/api/v1/authentication/login/access-token",method="POST"} 26.0
-http_request_duration_seconds_sum{handler="/api/v1/authentication/login/access-token",method="POST"} 46.86558849946596
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/mobile",le="0.1",method="POST"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/mobile",le="0.5",method="POST"} 2.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/mobile",le="1.0",method="POST"} 8.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/mobile",le="+Inf",method="POST"} 12.0
-http_request_duration_seconds_count{handler="/api/v1/authentication/login/challenge/{id}/mobile",method="POST"} 12.0
-http_request_duration_seconds_sum{handler="/api/v1/authentication/login/challenge/{id}/mobile",method="POST"} 31.121689800173044
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/mobile/verify",le="0.1",method="POST"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/mobile/verify",le="0.5",method="POST"} 9.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/mobile/verify",le="1.0",method="POST"} 9.0
-http_request_duration_seconds_bucket{handler="/api/v1/authentication/login/challenge/{id}/mobile/verify",le="+Inf",method="POST"} 12.0
-http_request_duration_seconds_count{handler="/api/v1/authentication/login/challenge/{id}/mobile/verify",method="POST"} 12.0
-http_request_duration_seconds_sum{handler="/api/v1/authentication/login/challenge/{id}/mobile/verify",method="POST"} 9.410030600382015
-http_request_duration_seconds_bucket{handler="/api/v1/reports",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports",le="0.5",method="GET"} 14.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports",le="1.0",method="GET"} 18.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports",le="+Inf",method="GET"} 18.0
-http_request_duration_seconds_count{handler="/api/v1/reports",method="GET"} 18.0
-http_request_duration_seconds_sum{handler="/api/v1/reports",method="GET"} 6.732858599862084
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="0.5",method="GET"} 17.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="1.0",method="GET"} 19.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="+Inf",method="GET"} 19.0
-http_request_duration_seconds_count{handler="/api/v1/reports/{id}",method="GET"} 19.0
-http_request_duration_seconds_sum{handler="/api/v1/reports/{id}",method="GET"} 4.125110899796709
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/list",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/list",le="0.5",method="GET"} 8.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/list",le="1.0",method="GET"} 13.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/list",le="+Inf",method="GET"} 14.0
-http_request_duration_seconds_count{handler="/api/v1/schemas/list",method="GET"} 14.0
-http_request_duration_seconds_sum{handler="/api/v1/schemas/list",method="GET"} 6.79956949967891
-http_request_duration_seconds_bucket{handler="/api/v1/render-report/{schema_id}",le="0.1",method="POST"} 3.0
-http_request_duration_seconds_bucket{handler="/api/v1/render-report/{schema_id}",le="0.5",method="POST"} 33.0
-http_request_duration_seconds_bucket{handler="/api/v1/render-report/{schema_id}",le="1.0",method="POST"} 135.0
-http_request_duration_seconds_bucket{handler="/api/v1/render-report/{schema_id}",le="+Inf",method="POST"} 175.0
-http_request_duration_seconds_count{handler="/api/v1/render-report/{schema_id}",method="POST"} 175.0
-http_request_duration_seconds_sum{handler="/api/v1/render-report/{schema_id}",method="POST"} 170.70267429598607
-http_request_duration_seconds_bucket{handler="/api/v1/reports/schema/{id}",le="0.1",method="POST"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/schema/{id}",le="0.5",method="POST"} 2.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/schema/{id}",le="1.0",method="POST"} 2.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/schema/{id}",le="+Inf",method="POST"} 2.0
-http_request_duration_seconds_count{handler="/api/v1/reports/schema/{id}",method="POST"} 2.0
-http_request_duration_seconds_sum{handler="/api/v1/reports/schema/{id}",method="POST"} 0.541155599988997
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="0.1",method="PUT"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="0.5",method="PUT"} 4.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="1.0",method="PUT"} 5.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="+Inf",method="PUT"} 5.0
-http_request_duration_seconds_count{handler="/api/v1/reports/{id}",method="PUT"} 5.0
-http_request_duration_seconds_sum{handler="/api/v1/reports/{id}",method="PUT"} 1.7451405997853726
-http_request_duration_seconds_bucket{handler="/metrics",le="0.1",method="GET"} 3.0
-http_request_duration_seconds_bucket{handler="/metrics",le="0.5",method="GET"} 3.0
-http_request_duration_seconds_bucket{handler="/metrics",le="1.0",method="GET"} 3.0
-http_request_duration_seconds_bucket{handler="/metrics",le="+Inf",method="GET"} 3.0
-http_request_duration_seconds_count{handler="/metrics",method="GET"} 3.0
-http_request_duration_seconds_sum{handler="/metrics",method="GET"} 0.039745100075379014
-http_request_duration_seconds_bucket{handler="/api/v1/",le="0.1",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/",le="0.5",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/",le="1.0",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/",le="+Inf",method="GET"} 1.0
-http_request_duration_seconds_count{handler="/api/v1/",method="GET"} 1.0
-http_request_duration_seconds_sum{handler="/api/v1/",method="GET"} 0.0021467998158186674
-http_request_duration_seconds_bucket{handler="/api/v1/health",le="0.1",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/health",le="0.5",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/health",le="1.0",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/health",le="+Inf",method="GET"} 1.0
-http_request_duration_seconds_count{handler="/api/v1/health",method="GET"} 1.0
-http_request_duration_seconds_sum{handler="/api/v1/health",method="GET"} 0.002825200092047453
-http_request_duration_seconds_bucket{handler="/api/v1/ping",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/ping",le="0.5",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/ping",le="1.0",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/ping",le="+Inf",method="GET"} 1.0
-http_request_duration_seconds_count{handler="/api/v1/ping",method="GET"} 1.0
-http_request_duration_seconds_sum{handler="/api/v1/ping",method="GET"} 6.092311999993399
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/calc",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/calc",le="0.5",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/calc",le="1.0",method="GET"} 2.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/schema/{id}/calc",le="+Inf",method="GET"} 15.0
-http_request_duration_seconds_count{handler="/api/v1/datas/schema/{id}/calc",method="GET"} 15.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/schema/{id}/calc",method="GET"} 37.34155060094781
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}/ref_keys",le="0.1",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}/ref_keys",le="0.5",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}/ref_keys",le="1.0",method="GET"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}/ref_keys",le="+Inf",method="GET"} 2.0
-http_request_duration_seconds_count{handler="/api/v1/schemas/{id}/ref_keys",method="GET"} 2.0
-http_request_duration_seconds_sum{handler="/api/v1/schemas/{id}/ref_keys",method="GET"} 19.682951600058004
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}/all_keys",le="0.1",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}/all_keys",le="0.5",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}/all_keys",le="1.0",method="GET"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/{id}/all_keys",le="+Inf",method="GET"} 1.0
-http_request_duration_seconds_count{handler="/api/v1/schemas/{id}/all_keys",method="GET"} 1.0
-http_request_duration_seconds_sum{handler="/api/v1/schemas/{id}/all_keys",method="GET"} 2.532461700029671
-http_request_duration_seconds_bucket{handler="/api/v1/datas/{id}",le="0.1",method="DELETE"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/{id}",le="0.5",method="DELETE"} 3.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/{id}",le="1.0",method="DELETE"} 3.0
-http_request_duration_seconds_bucket{handler="/api/v1/datas/{id}",le="+Inf",method="DELETE"} 3.0
-http_request_duration_seconds_count{handler="/api/v1/datas/{id}",method="DELETE"} 3.0
-http_request_duration_seconds_sum{handler="/api/v1/datas/{id}",method="DELETE"} 1.2842116998508573
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="0.1",method="DELETE"} 0.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="0.5",method="DELETE"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="1.0",method="DELETE"} 1.0
-http_request_duration_seconds_bucket{handler="/api/v1/reports/{id}",le="+Inf",method="DELETE"} 1.0
-http_request_duration_seconds_count{handler="/api/v1/reports/{id}",method="DELETE"} 1.0
-http_request_duration_seconds_sum{handler="/api/v1/reports/{id}",method="DELETE"} 0.16969359992071986
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/",le="0.1",method="GET"} 2.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/",le="0.5",method="GET"} 21.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/",le="1.0",method="GET"} 33.0
-http_request_duration_seconds_bucket{handler="/api/v1/schemas/",le="+Inf",method="GET"} 42.0
-http_request_duration_seconds_count{handler="/api/v1/schemas/",method="GET"} 42.0
-http_request_duration_seconds_sum{handler="/api/v1/schemas/",method="GET"} 55.569520900957286
-# HELP http_request_duration_seconds_created Latency with only few buckets by handler. Made to be only used if aggregation by handler is important. 
-# TYPE http_request_duration_seconds_created gauge
-http_request_duration_seconds_created{handler="none",method="OPTIONS"} 1.7615706676713789e+09
-http_request_duration_seconds_created{handler="/api/v1/authentication/login/users/me",method="GET"} 1.7615706682762272e+09
-http_request_duration_seconds_created{handler="/api/v1/dashboard/{app}",method="GET"} 1.7615706682797365e+09
-http_request_duration_seconds_created{handler="/api/v1/schemas/{id}",method="GET"} 1.7615706718645976e+09
-http_request_duration_seconds_created{handler="/api/v1/reports/schema/{id}",method="GET"} 1.7615706720857387e+09
-http_request_duration_seconds_created{handler="/api/v1/datas/schema/{id}",method="GET"} 1.761570672694557e+09
-http_request_duration_seconds_created{handler="/api/v1/datas/schema/{id}/list",method="GET"} 1.7615706729233396e+09
-http_request_duration_seconds_created{handler="/api/v1/datas/schema/{id}/ids",method="GET"} 1.7615706746504095e+09
-http_request_duration_seconds_created{handler="/api/v1/export_pdf/{report_id}",method="POST"} 1.7615706931041727e+09
-http_request_duration_seconds_created{handler="/api/v1/datas/{id}",method="GET"} 1.7615707106449618e+09
-http_request_duration_seconds_created{handler="/api/v1/dashboard",method="GET"} 1.7615716679411702e+09
-http_request_duration_seconds_created{handler="/api/v1/dashboard/",method="GET"} 1.7615716681552842e+09
-http_request_duration_seconds_created{handler="/docs",method="GET"} 1.761632615709429e+09
-http_request_duration_seconds_created{handler="/api/v1/openapi.json",method="GET"} 1.7616326164507253e+09
-http_request_duration_seconds_created{handler="/api/v1/datas/calc/{id}",method="GET"} 1.7616348764909415e+09
-http_request_duration_seconds_created{handler="/api/v1/files/meta/{id}",method="GET"} 1.761634881618831e+09
-http_request_duration_seconds_created{handler="/api/v1/datas/datum/{id}",method="PATCH"} 1.7616349291877217e+09
-http_request_duration_seconds_created{handler="/api/v1/datas/schema/{id}",method="POST"} 1.7616353803558328e+09
-http_request_duration_seconds_created{handler="none",method="GET"} 1.7616414748778045e+09
-http_request_duration_seconds_created{handler="/api/v1/types/currencies",method="GET"} 1.761652089339669e+09
-http_request_duration_seconds_created{handler="/api/v1/types/{base_type}",method="GET"} 1.761652089339669e+09
-http_request_duration_seconds_created{handler="/api/v1/authentication/login/challenge",method="POST"} 1.7617156153018217e+09
-http_request_duration_seconds_created{handler="/api/v1/authentication/login/challenge/{id}/totp",method="GET"} 1.7617156255361042e+09
-http_request_duration_seconds_created{handler="/api/v1/authentication/login/challenge/{id}/totp/verify",method="POST"} 1.7617156655990703e+09
-http_request_duration_seconds_created{handler="/api/v1/authentication/login/access-token",method="POST"} 1.7617156694839323e+09
 http_request_duration_seconds_created{handler="/api/v1/authentication/login/challenge/{id}/mobile",method="POST"} 1.761729395989651e+09
 http_request_duration_seconds_created{handler="/api/v1/authentication/login/challenge/{id}/mobile/verify",method="POST"} 1.7617294100371432e+09
 http_request_duration_seconds_created{handler="/api/v1/reports",method="GET"} 1.7617295022666554e+09
@@ -729,18 +390,40 @@ http_request_duration_seconds_created{handler="/api/v1/schemas/{id}/ref_keys",me
 http_request_duration_seconds_created{handler="/api/v1/schemas/{id}/all_keys",method="GET"} 1.762235301726929e+09
 http_request_duration_seconds_created{handler="/api/v1/datas/{id}",method="DELETE"} 1.7623381522032278e+09
 http_request_duration_seconds_created{handler="/api/v1/reports/{id}",method="DELETE"} 1.7623535637506275e+09
-  http_request_duration_seconds_created{handler="/api/v1/schemas/",method="GET"} 1.762668464381682e+09`
+  http_request_duration_seconds_created{handler="/api/v1/schemas/",method="GET"} 1.762668464381682e+09`;
 
-  async function fetchMetrics() {
+export default function MetricsDashboard() {
+  const context = useContext(DataContext);
+  const searchInput = context?.searchInput || "";
+
+  const [metrics, setMetrics] = useState<Metrics>({});
+  const [loading, setLoading] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<StatusType>("");
+  const [selectedMethod, setSelectedMethod] = useState<MethodType>("");
+
+  const handleMetricChange = useCallback((value: string) => {
+    setSelectedMetric(value);
+    setSelectedStatus("");
+    setSelectedMethod("");
+  }, []);
+
+  const handleStatusChange = useCallback((value: StatusType) => {
+    setSelectedStatus(value);
+  }, []);
+
+  const handleMethodChange = useCallback((value: MethodType) => {
+    setSelectedMethod(value);
+  }, []);
+
+  const fetchMetrics = useCallback(async () => {
     setLoading(true);
     await new Promise((res) => setTimeout(res, 500));
 
     try {
-      // using hardcoded data for testing
-      const parsedToJSON = parseMetrics(hardCodedMetricData);
+      const parsedToJSON = parseMetrics(HARD_CODED_METRIC_DATA);
       setMetrics(parsedToJSON);
       
-      // selecting metric when reloaded
       if (!selectedMetric) {
         const firstMetric = Object.keys(parsedToJSON)[0];
         if (firstMetric) {
@@ -770,234 +453,87 @@ http_request_duration_seconds_created{handler="/api/v1/reports/{id}",method="DEL
     // } finally {
     //   setLoading(false);
     // }
-  }
+  }, [selectedMetric]);
+
 
   useEffect(() => {
     fetchMetrics();
-  }, []);
-  
-  function titleCase(str: string) {
-    var splitStr = str.toLowerCase().split(' ');
-    for (var i = 0; i < splitStr.length; i++) {
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
-    }
-    return splitStr.join(' '); 
-  }
+  }, [fetchMetrics]);
 
-  function parseMetrics(text: string): Metrics {
-    const lines = text.split("\n");
-    const metrics: Metrics = {};
-
-    for (const line of lines) {
-      if (line.startsWith("#") || line.trim() === "" || line.includes("python")) continue;
-
-      const [metricPart, valuePart] = line.split(" ");
-      if (!metricPart || !valuePart) continue;
-
-      const match = metricPart.match(/^([^{]+){?(.*?)}?$/);
-
-      if (!match) continue;
-
-      let name = match[1].replaceAll("_"," ");
-      name = titleCase(name);
-      const labelsString = match[2];
-      
-      labelsString.charAt(match[2].length + 1) == ""
-      const labels: Record<string, string> = {};
-
-      if (labelsString) {
-        labelsString.split(",").forEach(pair => {
-          const [key, val] = pair.split("=");
-          if (key && val) labels[key] = val
-        });
-      }
-
-      if (!metrics[name]) metrics[name] = [];
-      metrics[name].push({ labels, value: parseFloat(valuePart) });
-    }
-    return metrics;
-  }
-
-  // getting available labels for the selected metric
-  const getAvailableLabels = () => {
+  const availableLabels = useMemo(() => {
     if (!selectedMetric || !metrics[selectedMetric]) {
-        return { hasStatus: false, hasMethod: false, statuses: [], methods: [] };
-      }
+      return { hasStatus: false, hasMethod: false, statuses: [], methods: [] };
+    }
 
-      const statuses = [...new Set(
-        metrics[selectedMetric]
-          .map(metric => metric.labels.status)
-          .filter(Boolean)
-      )];
+    const statuses = [...new Set(
+      metrics[selectedMetric]
+        .map(metric => metric.labels.status)
+        .filter(Boolean)
+    )] as StatusType[];
 
-      const methods = [...new Set(
-        metrics[selectedMetric]
-          .map(metric => metric.labels.method)
-          .filter(Boolean)
-      )];
+    const methods = [...new Set(
+      metrics[selectedMetric]
+        .map(metric => metric.labels.method)
+        .filter(Boolean)
+    )] as MethodType[];
 
-      return {
-        hasStatus: statuses.length > 0,
-        hasMethod: methods.length > 0,
-        statuses,
-        methods
-      };
-  };
+    return {
+      hasStatus: statuses.length > 0,
+      hasMethod: methods.length > 0,
+      statuses,
+      methods
+    };
+  }, [selectedMetric, metrics]);
 
-  const availableLabels = getAvailableLabels();
-
-  // to filter the selected metric data based on status and method and searchinput
-  const getFilteredMetricData = (): MetricType[] => {
-
+  const filteredMetricData = useMemo(() => {
     if (!selectedMetric || !metrics[selectedMetric]) {
       return [];
     }
+    
+    const searchTerm = searchInput.toLowerCase();
+    
     return metrics[selectedMetric].filter(metric => {
-
       if (selectedStatus && metric.labels.status !== selectedStatus) return false;
+      
       if (selectedMethod && metric.labels.method !== selectedMethod) return false;
-      if (searchInput) {
+      
+      if (searchTerm) {
         const hasMatchingLabel = Object.values(metric.labels).some(value =>
-          value.toLowerCase().includes(searchInput.toLowerCase())
+          value.toLowerCase().includes(searchTerm)
         );
-        if (!hasMatchingLabel) return false;
+        if (!hasMatchingLabel) {
+          return false;
+        }
       }
+      
       return true;
     });
-  };
-
-  const filteredMetricData = getFilteredMetricData();
+  }, [selectedMetric, metrics, selectedStatus, selectedMethod, searchInput]);
 
   return (
     <div className="w-full bg-gray-100 dark:bg-gray-900 transition-colors min-h-screen">
-      <div className="p-7">
-        {/*Header*/}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 ml-2">
-              Metrics Dashboard
-            </h1>
-          </div>
-          
-          <div className="flex items-center gap-4">
+      <div className="p-4 md:p-6 lg:p-7">
+        <MetricsHeader metrics={metrics} selectedMetric={selectedMetric} selectedMethod={selectedMethod} selectedStatus={selectedStatus} availableLabels={availableLabels} loading={loading} onMethodChange={handleMethodChange} onMetricChange={handleMetricChange} onStatusChange={handleStatusChange} onRefresh={fetchMetrics}/>
 
-            {/*Refresh Button*/}
-            <RefreshButton 
-              onRefresh={fetchMetrics} 
-              loading={loading}
-              tooltipTitle="Refresh Metrics Data"
-            />
+        {loading && <LoadingTable />}
 
-            {/*Metric Selector*/}
-            <select 
-              value={selectedMetric}
-              onChange={(e) => {
-                setSelectedMetric(e.target.value);
-                setSelectedStatus("");
-                setSelectedMethod("");
-              }}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="">Select Metric...</option>
-              {Object.keys(metrics).map(metricName => (
-                <option key={metricName} value={metricName}>
-                  {metricName}
-                </option>
-              ))}
-            </select>  
-
-            {/*Status Selector*/}
-            {availableLabels.hasStatus && (
-              <select 
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value as StatusType)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              >
-                <option value="">All Statuses</option>
-                {availableLabels.statuses.map(status => (
-                  <option key={status} value={status}>
-                    {status.replaceAll("\"","")}
-                  </option>
-                ))}
-              </select>
+        {!loading && selectedMetric && Object.keys(metrics).length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            {filteredMetricData.length > 0 ? (
+              <BarChart 
+                metricName={selectedMetric!} 
+                metricData={filteredMetricData} 
+              />
+            ) : (
+              <NoFilteredDataFound />
             )}
-
-            {/*Method Selector*/}
-            {availableLabels.hasMethod && (
-              <select 
-                value={selectedMethod}
-                onChange={(e) => setSelectedMethod(e.target.value as MethodType)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              >
-                <option value="">All Methods</option>
-                {availableLabels.methods.map(method => (
-                  <option key={method} value={method}>
-                    {method.replaceAll("\"","")}
-                  </option>
-                ))}
-              </select>
-            )}  
-          </div>
-        </div>
-
-        {loading && (
-          <LoadingTable/>
-        )}
-
-        {!loading && Object.keys(metrics).length > 0 && (
-          <>
-            {selectedMetric && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                {filteredMetricData.length > 0 ? (
-                  <BarChart 
-                    metricName={selectedMetric} 
-                    metricData={filteredMetricData} 
-                  />
-                ) : (
-                  <div className="p-8 text-center">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      No data found
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      No metrics match your current filters and search.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {!selectedMetric && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  Select a metric to view its chart
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Choose from the dropdown menu above
-                </p>
-              </div>
-            )}
-          </>
-        )}
-
-        {!loading && Object.keys(metrics).length === 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              No metrics data available
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Try refreshing the metrics or check your data source
-            </p>
           </div>
         )}
+
+        {!loading && !selectedMetric && Object.keys(metrics).length > 0 && <NoMetricSelected />}
+        
+        {!loading && !(Object.keys(metrics).length > 0) && <NoDataAvailable />}
       </div>
     </div>
   );
 }
-
-// final json format:
-// {
-//   "http_requests_total": [
-//     { "labels": { "handler": "/api/v1/datas/calc/{id}", "method": "GET", "status": "2xx" }, "value": 5033 },
-//     { "labels": { "handler": "/api/v1/datas/calc/{id}", "method": "GET", "status": "5xx" }, "value": 2 }
-//   ]
-// }
